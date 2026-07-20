@@ -100,10 +100,13 @@ Please analyze the attached meeting transcript document.
       }
     })
 
-    const resultText = response.text
+    let resultText = response.text
     if (!resultText) {
       throw new Error("AI returned empty response")
     }
+
+    // Strip markdown formatting if AI returns ```json ... ```
+    resultText = resultText.replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
 
     const generatedJson = JSON.parse(resultText)
 
