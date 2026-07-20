@@ -33,7 +33,7 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
           className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors"
         >
           <FileText size={20} />
-          <span className="font-medium">New MoM</span>
+          <span className="font-medium">New Minute of Meeting</span>
         </Link>
         <Link
           href="/settings"

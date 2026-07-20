@@ -22,7 +22,7 @@ export default async function NewMomPage() {
   return (
     <div className="w-full">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Create New MoM</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Create New Minute of Meeting</h1>
         <p className="text-gray-500 mt-2">Follow the steps below to generate your AI-powered meeting minutes.</p>
       </div>
       

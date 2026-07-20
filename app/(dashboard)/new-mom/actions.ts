@@ -30,7 +30,7 @@ export async function submitMomDraft(formData: FormData) {
     const evidenceExt = evidenceFile.name.split('.').pop()
     const evidenceFileName = `${user.id}/${Date.now()}_evidence.${evidenceExt}`
     
-    const { error: evidenceUploadError, data: evidenceData } = await supabase.storage
+    const { error: evidenceUploadError } = await supabase.storage
       .from('mom_evidences')
       .upload(evidenceFileName, evidenceFile, {
         upsert: false
@@ -41,26 +41,43 @@ export async function submitMomDraft(formData: FormData) {
       return { success: false, error: 'Failed to upload evidence photo. Ensure mom_evidences bucket exists and accepts 3MB files.' }
     }
 
-    // Since we don't have a content bucket yet, we'll store the content file text/audio later in Sprint 4.
-    // For Sprint 3, we just save the evidence URL and metadata to DB as a draft.
-    // (In Sprint 4 we will parse this file or upload it).
-    
-    // Get public URL for evidence
     const { data: publicUrlData } = supabase.storage
       .from('mom_evidences')
       .getPublicUrl(evidenceFileName)
 
-    // 2. Insert to Database
+    // 2. Upload Content File to 'mom_contents'
+    const contentExt = contentFile.name.split('.').pop()
+    const contentFileName = `${user.id}/${Date.now()}_content.${contentExt}`
+    
+    const { error: contentUploadError } = await supabase.storage
+      .from('mom_contents')
+      .upload(contentFileName, contentFile, {
+        upsert: false
+      })
+
+    if (contentUploadError) {
+      console.error('Content upload error:', contentUploadError)
+      // We don't rollback evidence here to keep it simple, but in production we should.
+      return { success: false, error: 'Failed to upload transcript/audio. Ensure mom_contents bucket exists and has correct policies.' }
+    }
+    
+    // We only need the internal path for deletion and processing later, but we can store the path.
+    const contentStoragePath = contentFileName;
+
+    // 3. Insert to Database
     const { data: momData, error: dbError } = await supabase
       .from('meeting_mom')
       .insert({
         user_id: user.id,
         topic,
         meeting_date,
-        facilitator: 'To Be Decided', // Default for now
-        participants: attendees.split(',').map(s => s.trim()).filter(Boolean), // Array of strings
+        facilitator: 'To Be Decided', 
+        participants: attendees.split(',').map(s => s.trim()).filter(Boolean), 
         photo_evidence_url: publicUrlData.publicUrl,
-        content_json: { location }, // Store location inside JSONB
+        content_json: { 
+          location, 
+          raw_file_path: contentStoragePath 
+        }, 
         ai_model_used: 'pending',
         status: 'draft',
       })
