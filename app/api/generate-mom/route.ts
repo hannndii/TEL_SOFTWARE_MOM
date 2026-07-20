@@ -64,15 +64,30 @@ export async function POST(request: Request) {
     }
 
     // 4. Generate MoM using Gemini API
-    const systemPrompt = `You are a professional corporate secretary assistant. Your task is to extract meeting minutes from the provided document.
+    const systemPrompt = `You are a professional corporate secretary assistant for Telkom Indonesia. Your task is to extract meeting minutes from the provided document and format it strictly matching this template.
 Output the result strictly as a valid JSON object with the following schema:
 {
-  "pembahasan_utama": "String summarizing the main discussion",
-  "note_dari_tiap_pihak": ["Array of strings containing notes from participants"],
-  "action_plan": ["Array of strings containing the action plans"],
-  "informasi_tambahan": "String containing any additional information, or null"
+  "dasar_pembahasan": ["Array of strings representing the main topics discussed (Dasar Pembahasan)"],
+  "notes": [
+    {
+      "nama_pihak": "String representing the name of the speaker/party",
+      "informasi": ["Array of strings containing the points/information they delivered"]
+    }
+  ],
+  "action_plan": [
+    {
+      "pic": "String representing the Person in Charge",
+      "action": "String describing the action to be taken"
+    }
+  ],
+  "informasi_tambahan": {
+    "keputusan_final": "String summarizing the final decision",
+    "kendala": "String summarizing any obstacles mentioned",
+    "risiko": "String summarizing any risks mentioned",
+    "menunggu_keputusan": "String summarizing things still pending decision"
+  }
 }
-Ensure the language is formal Indonesian.
+Ensure the language is formal Indonesian. If any section is not mentioned in the transcript, provide an empty array [] or "-" instead of null.
 `
     const userPrompt = `
 Meeting Topic: ${momData.topic}

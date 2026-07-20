@@ -5,9 +5,13 @@ const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 
 // Step 1: Metadata
 export const metadataSchema = z.object({
-  topic: z.string().min(3, "Topic must be at least 3 characters").max(100),
+  agenda: z.string().min(3, "Agenda must be at least 3 characters").max(100),
   meeting_date: z.string().min(1, "Meeting date is required"),
-  location: z.string().min(2, "Location or Meeting Link is required"),
+  time: z.string().min(1, "Time is required"),
+  location: z.string().min(2, "Location or Venue is required"),
+  type_of_meeting: z.enum(["Review", "Briefing", "Coordination", "Decision Making", "Other"], {
+    errorMap: () => ({ message: "Please select a meeting type" })
+  }),
   attendees: z.string().min(2, "Attendees are required"),
 });
 

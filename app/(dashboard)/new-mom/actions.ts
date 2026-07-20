@@ -13,8 +13,10 @@ export async function submitMomDraft(formData: FormData) {
     }
 
     // Extract Metadata
-    const topic = formData.get('topic') as string
+    const agenda = formData.get('agenda') as string
     const meeting_date = formData.get('meeting_date') as string
+    const time = formData.get('time') as string
+    const type_of_meeting = formData.get('type_of_meeting') as string
     const location = formData.get('location') as string
     const attendees = formData.get('attendees') as string
 
@@ -22,7 +24,7 @@ export async function submitMomDraft(formData: FormData) {
     const contentFile = formData.get('contentFile') as File
     const evidenceFile = formData.get('evidenceFile') as File
 
-    if (!topic || !meeting_date || !location || !attendees || !contentFile || !evidenceFile) {
+    if (!agenda || !meeting_date || !time || !type_of_meeting || !location || !attendees || !contentFile || !evidenceFile) {
       return { success: false, error: 'Missing required fields or files' }
     }
 
@@ -69,13 +71,15 @@ export async function submitMomDraft(formData: FormData) {
       .from('meeting_mom')
       .insert({
         user_id: user.id,
-        topic,
+        topic: agenda, // Map agenda to topic to avoid DB migration
         meeting_date,
-        facilitator: 'To Be Decided', 
+        facilitator: user?.user_metadata?.full_name || user?.email || 'To Be Decided', // Set default facilitator
         participants: attendees.split(',').map(s => s.trim()).filter(Boolean), 
         photo_evidence_url: publicUrlData.publicUrl,
         content_json: { 
-          location, 
+          location,
+          time,
+          type_of_meeting, 
           raw_file_path: contentStoragePath 
         }, 
         ai_model_used: 'pending',

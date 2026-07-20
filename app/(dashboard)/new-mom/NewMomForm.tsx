@@ -20,8 +20,10 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
   
   // Shared State for all steps
   const [formData, setFormData] = useState({
-    topic: '',
+    agenda: '',
     meeting_date: '',
+    time: '',
+    type_of_meeting: '',
     location: '',
     attendees: '',
     contentFile: null as File | null,
@@ -33,7 +35,7 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
   // Forms
   const { register: registerMeta, handleSubmit: handleMetaSubmit, formState: { errors: metaErrors } } = useForm({
     resolver: zodResolver(metadataSchema),
-    defaultValues: { topic: formData.topic, meeting_date: formData.meeting_date, location: formData.location, attendees: formData.attendees }
+    defaultValues: { agenda: formData.agenda, meeting_date: formData.meeting_date, time: formData.time, type_of_meeting: formData.type_of_meeting, location: formData.location, attendees: formData.attendees }
   })
 
   const { register: registerContent, handleSubmit: handleContentSubmit, setValue: setContentValue, watch: watchContent, formState: { errors: contentErrors } } = useForm({
@@ -65,8 +67,10 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
       const finalData = { ...formData, evidenceFile: data.evidenceFile }
       
       const submitData = new FormData()
-      submitData.append('topic', finalData.topic)
+      submitData.append('agenda', finalData.agenda)
       submitData.append('meeting_date', finalData.meeting_date)
+      submitData.append('time', finalData.time)
+      submitData.append('type_of_meeting', finalData.type_of_meeting)
       submitData.append('location', finalData.location)
       submitData.append('attendees', finalData.attendees)
       if (finalData.contentFile) submitData.append('contentFile', finalData.contentFile)
@@ -129,25 +133,45 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Topic / Subject</label>
-                <input {...registerMeta('topic')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="e.g. Q3 Marketing Strategy" />
-                {metaErrors.topic && <p className="text-red-500 text-xs mt-1">{metaErrors.topic.message as string}</p>}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Agenda</label>
+                <input {...registerMeta('agenda')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="e.g. Q3 Marketing Strategy" />
+                {metaErrors.agenda && <p className="text-red-500 text-xs mt-1">{metaErrors.agenda.message as string}</p>}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                  <input type="date" {...registerMeta('meeting_date')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" />
+                  {metaErrors.meeting_date && <p className="text-red-500 text-xs mt-1">{metaErrors.meeting_date.message as string}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                  <input type="time" {...registerMeta('time')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" />
+                  {metaErrors.time && <p className="text-red-500 text-xs mt-1">{metaErrors.time.message as string}</p>}
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                <input type="date" {...registerMeta('meeting_date')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" />
-                {metaErrors.meeting_date && <p className="text-red-500 text-xs mt-1">{metaErrors.meeting_date.message as string}</p>}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Type of Meeting</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {["Review", "Briefing", "Coordination", "Decision Making", "Other"].map((type) => (
+                    <label key={type} className="flex items-center gap-2 text-sm text-gray-700 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <input type="radio" value={type} {...registerMeta('type_of_meeting')} className="text-telkom-red focus:ring-telkom-red" />
+                      {type}
+                    </label>
+                  ))}
+                </div>
+                {metaErrors.type_of_meeting && <p className="text-red-500 text-xs mt-1">{metaErrors.type_of_meeting.message as string}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location / Link</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Venue / Link</label>
                 <input {...registerMeta('location')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="e.g. Zoom or Meeting Room A" />
                 {metaErrors.location && <p className="text-red-500 text-xs mt-1">{metaErrors.location.message as string}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Attendees</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Attendees (Comma separated)</label>
                 <textarea {...registerMeta('attendees')} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="John Doe, Jane Smith..."></textarea>
                 {metaErrors.attendees && <p className="text-red-500 text-xs mt-1">{metaErrors.attendees.message as string}</p>}
               </div>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, FileText, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Loader2, AlertCircle, Printer, CheckCircle2 } from 'lucide-react'
 
 export default function MomDetailClient({ mom }: { mom: any }) {
   const router = useRouter()
@@ -25,7 +25,6 @@ export default function MomDetailClient({ mom }: { mom: any }) {
             throw new Error(data.error || 'Failed to generate MoM')
           }
           
-          // Refresh page to get the updated status and JSON content
           router.refresh()
           setIsProcessing(false)
         } catch (err: any) {
@@ -73,75 +72,199 @@ export default function MomDetailClient({ mom }: { mom: any }) {
   }
 
   const { content_json } = mom
+  
+  // Format date correctly
+  const meetingDateObj = new Date(mom.meeting_date)
+  const formattedDate = meetingDateObj.toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })
+  
+  // Parse checkboxes
+  const types = ["Review", "Briefing", "Coordination", "Decision Making", "Other"]
+  const selectedType = content_json?.type_of_meeting || "Review"
 
-  // For Sprint 4, we just display the JSON result cleanly. 
-  // In Sprint 5, we will build the Rich Text Editor here.
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex justify-between items-start border-b border-gray-100 pb-6 mb-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-3xl font-bold text-gray-900">{mom.topic}</h1>
-              <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1">
-                <CheckCircle2 size={14} /> Completed
-              </span>
-            </div>
-            <p className="text-gray-500 text-sm">
-              {new Date(mom.meeting_date).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              {content_json?.location && ` • ${content_json.location}`}
-            </p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-gray-900">AI Model</p>
-            <p className="text-xs text-gray-500">{mom.ai_model_used}</p>
-          </div>
+    <div className="max-w-5xl mx-auto mb-20">
+      
+      {/* ACTION BAR (Hidden in print) */}
+      <div className="flex justify-between items-center mb-6 print:hidden">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Meeting Minutes</h1>
+          <p className="text-sm text-gray-500">Document is ready to be exported.</p>
         </div>
+        <button 
+          onClick={() => window.print()} 
+          className="bg-telkom-red text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-red-700 transition-colors shadow-sm"
+        >
+          <Printer size={18} />
+          Export to PDF
+        </button>
+      </div>
 
-        <div className="space-y-8">
-          <section>
-            <h2 className="text-lg font-bold text-telkom-navy flex items-center gap-2 mb-3">
-              <FileText size={20} /> Pembahasan Utama
-            </h2>
-            <div className="bg-gray-50 p-4 rounded-xl text-gray-700 text-sm leading-relaxed border border-gray-100">
-              {content_json?.pembahasan_utama || 'Tidak ada data pembahasan.'}
-            </div>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-telkom-navy flex items-center gap-2 mb-3">
-              <FileText size={20} /> Catatan Partisipan
-            </h2>
-            <ul className="list-disc pl-5 space-y-2 text-sm text-gray-700">
-              {content_json?.note_dari_tiap_pihak?.length > 0 ? (
-                content_json.note_dari_tiap_pihak.map((note: string, idx: number) => (
-                  <li key={idx}>{note}</li>
-                ))
-              ) : (
-                <li className="text-gray-500 italic">Tidak ada catatan spesifik.</li>
-              )}
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="text-lg font-bold text-telkom-navy flex items-center gap-2 mb-3">
-              <FileText size={20} /> Action Plan
-            </h2>
-            <div className="grid gap-3">
-              {content_json?.action_plan?.length > 0 ? (
-                content_json.action_plan.map((action: string, idx: number) => (
-                  <div key={idx} className="bg-white border border-gray-200 p-4 rounded-xl shadow-sm flex items-start gap-3">
-                    <div className="bg-red-50 text-telkom-red w-6 h-6 rounded-full flex items-center justify-center shrink-0 font-bold text-xs">
-                      {idx + 1}
-                    </div>
-                    <p className="text-sm text-gray-700 mt-0.5">{action}</p>
+      {/* A4 DOCUMENT PAGE */}
+      <div className="bg-white mx-auto shadow-xl print:shadow-none print:m-0 print:p-0" style={{ maxWidth: '210mm', minHeight: '297mm' }}>
+        <div className="p-10 text-sm text-black font-sans leading-relaxed">
+          
+          {/* HEADER TABLE */}
+          <table className="w-full border-collapse border border-black mb-8">
+            <tbody>
+              <tr>
+                <td rowSpan={4} className="border border-black w-1/4 p-4 text-center align-middle">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Telkom_Indonesia_2013.svg/1200px-Telkom_Indonesia_2013.svg.png" alt="Telkom Indonesia" className="w-24 mx-auto" />
+                </td>
+                <td colSpan={3} className="border border-black p-2 text-center font-bold text-lg uppercase">
+                  MINUTE OF MEETING
+                </td>
+              </tr>
+              <tr>
+                <td className="border border-black p-2 font-medium w-32">Date</td>
+                <td colSpan={2} className="border border-black p-2">{formattedDate}</td>
+              </tr>
+              <tr>
+                <td className="border border-black p-2 font-medium">Time</td>
+                <td colSpan={2} className="border border-black p-2">{content_json?.time || '-'}</td>
+              </tr>
+              <tr>
+                <td className="border border-black p-2 font-medium">Venue</td>
+                <td colSpan={2} className="border border-black p-2">{content_json?.location || '-'}</td>
+              </tr>
+              
+              <tr>
+                <td className="border border-black p-2 font-medium">Meeting Called by</td>
+                <td className="border border-black p-2">Telkom SDA</td>
+                <td className="border border-black p-2 font-medium">Note Taker</td>
+                <td className="border border-black p-2">{mom.user?.user_metadata?.full_name || 'System User'}</td>
+              </tr>
+              
+              <tr>
+                <td className="border border-black p-2 font-medium">Type of meeting</td>
+                <td colSpan={3} className="border border-black p-2">
+                  <div className="flex gap-6 flex-wrap">
+                    {types.map(type => (
+                      <label key={type} className="flex items-center gap-1 cursor-pointer">
+                        <input type="checkbox" checked={selectedType === type} readOnly className="w-3 h-3 text-black border-gray-400 rounded-none focus:ring-0" />
+                        {type}
+                      </label>
+                    ))}
                   </div>
-                ))
-              ) : (
-                <p className="text-sm text-gray-500 italic">Tidak ada action plan.</p>
-              )}
+                </td>
+              </tr>
+
+              <tr>
+                <td className="border border-black p-2 font-medium">Facilitator</td>
+                <td colSpan={3} className="border border-black p-2">{mom.facilitator || '-'}</td>
+              </tr>
+              
+              <tr>
+                <td className="border border-black p-2 font-medium">Attendees</td>
+                <td colSpan={3} className="border border-black p-2">{mom.participants?.join(', ') || '-'}</td>
+              </tr>
+
+              <tr>
+                <td className="border border-black p-2 font-medium">AGENDA</td>
+                <td colSpan={3} className="border border-black p-2">{mom.topic || '-'}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* CONTENT SECTION */}
+          <div className="space-y-6">
+            
+            {/* A. Dasar Pembahasan */}
+            <div>
+              <h3 className="font-bold mb-2">A. Dasar Pembahasan</h3>
+              <ul className="list-disc pl-8 space-y-1">
+                {content_json?.dasar_pembahasan?.length > 0 ? (
+                  content_json.dasar_pembahasan.map((item: string, i: number) => <li key={i}>{item}</li>)
+                ) : (
+                  <li>-</li>
+                )}
+              </ul>
             </div>
-          </section>
+
+            {/* B. Note */}
+            <div>
+              <h3 className="font-bold mb-2">B. Note</h3>
+              <p className="font-medium mb-2 pl-4">Topik: {mom.topic}</p>
+              <div className="pl-4 space-y-4">
+                {content_json?.notes?.length > 0 ? (
+                  content_json.notes.map((note: any, i: number) => (
+                    <div key={i}>
+                      <p className="font-medium">{i + 1}. {note.nama_pihak}:</p>
+                      <ul className="list-[circle] pl-8 space-y-1 mt-1">
+                        {note.informasi?.map((info: string, idx: number) => (
+                          <li key={idx}>{info}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))
+                ) : (
+                  <p className="pl-4">-</p>
+                )}
+              </div>
+            </div>
+
+            {/* C. Action Plan */}
+            <div>
+              <h3 className="font-bold mb-2">C. Action Plan</h3>
+              <table className="w-full border-collapse border border-black text-sm">
+                <thead>
+                  <tr>
+                    <th className="border border-black p-2 text-left w-1/3">PIC</th>
+                    <th className="border border-black p-2 text-left">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {content_json?.action_plan?.length > 0 ? (
+                    content_json.action_plan.map((action: any, i: number) => (
+                      <tr key={i}>
+                        <td className="border border-black p-2">{action.pic}</td>
+                        <td className="border border-black p-2">{action.action}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="border border-black p-2">-</td>
+                      <td className="border border-black p-2">-</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* D. Information Tambahan */}
+            <div>
+              <h3 className="font-bold mb-2">D. Information Tambahan</h3>
+              <ul className="list-disc pl-8 space-y-2">
+                <li><strong>Keputusan Final:</strong> {content_json?.informasi_tambahan?.keputusan_final || '-'}</li>
+                <li><strong>Kendala yang Disampaikan:</strong> {content_json?.informasi_tambahan?.kendala || '-'}</li>
+                <li><strong>Risiko yang Disebutkan:</strong> {content_json?.informasi_tambahan?.risiko || '-'}</li>
+                <li><strong>Hal yang Masih Menunggu Keputusan:</strong> {content_json?.informasi_tambahan?.menunggu_keputusan || '-'}</li>
+              </ul>
+            </div>
+
+            {/* SIGNATURE SECTION (Page Break for PDF if needed, but we let it flow naturally) */}
+            <div className="pt-20 pb-10">
+              <div className="flex justify-center text-center">
+                <div>
+                  <p>Jakarta, {formattedDate}</p>
+                  <p className="font-bold">Mengetahui</p>
+                  
+                  <div className="mt-24">
+                    <p className="font-bold">Via {content_json?.location?.includes('Zoom') ? 'Zoom Meeting' : content_json?.location}</p>
+                    <p className="font-bold">(Foto kehadiran)</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* EVIDENCE PHOTO */}
+            {mom.photo_evidence_url && (
+              <div className="mt-10 break-before-page">
+                <p className="text-xs italic mb-4">*foto yang diinput sebagai evidance</p>
+                <img src={mom.photo_evidence_url} alt="Evidence" className="max-w-full h-auto max-h-[150mm] object-contain border border-gray-200" />
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
     </div>
