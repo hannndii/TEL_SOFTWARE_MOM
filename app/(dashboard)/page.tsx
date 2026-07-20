@@ -29,7 +29,7 @@ export default async function Dashboard() {
     .from('meeting_mom')
     .select('*')
     .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
+    .order('updated_at', { ascending: false })
     .limit(5);
 
   const isPremium = userProfile?.tier === 'premium';
