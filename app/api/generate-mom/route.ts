@@ -87,7 +87,7 @@ Please analyze the attached meeting transcript document.
     const base64Data = Buffer.from(arrayBuffer).toString('base64')
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.0-flash',
       contents: [
         { role: 'user', parts: [
             { text: systemPrompt + userPrompt },
@@ -115,7 +115,7 @@ Please analyze the attached meeting transcript document.
       .from('meeting_mom')
       .update({
         content_json: generatedJson,
-        ai_model_used: 'gemini-2.5-flash',
+        ai_model_used: 'gemini-2.0-flash',
         status: 'exported', // we use 'exported' or 'completed' to signify it's done
         updated_at: new Date().toISOString()
       })
