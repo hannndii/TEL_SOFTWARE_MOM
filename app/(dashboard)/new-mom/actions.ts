@@ -57,9 +57,11 @@ export async function submitMomDraft(formData: FormData) {
         user_id: user.id,
         topic,
         meeting_date,
-        location,
-        attendees,
-        evidence_url: publicUrlData.publicUrl,
+        facilitator: 'To Be Decided', // Default for now
+        participants: attendees.split(',').map(s => s.trim()).filter(Boolean), // Array of strings
+        photo_evidence_url: publicUrlData.publicUrl,
+        content_json: { location }, // Store location inside JSONB
+        ai_model_used: 'pending',
         status: 'draft',
       })
       .select()
@@ -67,7 +69,7 @@ export async function submitMomDraft(formData: FormData) {
 
     if (dbError) {
       console.error('DB Insert Error:', dbError)
-      return { success: false, error: 'Failed to save MoM draft' }
+      return { success: false, error: 'Failed to save MoM draft: ' + dbError.message }
     }
 
     revalidatePath('/')
