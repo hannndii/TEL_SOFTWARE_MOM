@@ -89,18 +89,41 @@ export default async function Dashboard() {
         </div>
         
         {recentMoms && recentMoms.length > 0 ? (
-          <div className="divide-y divide-gray-100">
-            {recentMoms.map((mom) => (
-              <div key={mom.id} className="p-6 hover:bg-gray-50 transition-colors flex items-center justify-between">
-                <div>
-                  <h3 className="text-md font-semibold text-gray-900">{mom.topic}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{new Date(mom.meeting_date).toLocaleDateString()} • {mom.status}</p>
-                </div>
-                <Link href={`/mom/${mom.id}`} className="text-telkom-navy hover:underline text-sm font-medium">
-                  View Details
-                </Link>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100 text-sm text-gray-500">
+                  <th className="px-6 py-4 font-medium">Topic</th>
+                  <th className="px-6 py-4 font-medium">Meeting Date</th>
+                  <th className="px-6 py-4 font-medium">Status</th>
+                  <th className="px-6 py-4 font-medium text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {recentMoms.map((mom) => (
+                  <tr key={mom.id} className="hover:bg-gray-50/50 transition-colors">
+                    <td className="px-6 py-4">
+                      <h3 className="text-sm font-semibold text-gray-900">{mom.topic}</h3>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">
+                      {new Date(mom.meeting_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${
+                        mom.status === 'draft' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {mom.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link href={`/mom/${mom.id}`} className="text-telkom-navy hover:text-blue-800 text-sm font-medium transition-colors">
+                        View Details
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         ) : (
           <div className="p-6 text-center py-12 text-gray-500">
