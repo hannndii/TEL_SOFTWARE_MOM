@@ -30,34 +30,25 @@ export async function signup(formData: FormData) {
     password: formData.get('password') as string,
   }
 
-  const { error, data: authData } = await supabase.auth.signUp(data)
+  // Define the redirect URL for the email template link
+  // Use VERCEL_URL if deployed, otherwise fallback to localhost
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  const redirectUrl = `${siteUrl}/auth/confirm`
+
+  const { error, data: authData } = await supabase.auth.signUp({
+    ...data,
+    options: {
+      emailRedirectTo: redirectUrl,
+    }
+  })
 
   if (error) {
     redirect('/signup?error=' + encodeURIComponent(error.message))
   }
 
-  // Jika berhasil sign up, redirect ke halaman verifikasi OTP
-  if (authData?.user) {
-    redirect('/verify?email=' + encodeURIComponent(data.email))
-  }
-
-  redirect('/')
-}
-
-export async function verifyOtp(formData: FormData) {
-  const supabase = await createClient()
-
-  const email = formData.get('email') as string
-  const token = formData.get('token') as string
-
-  const { error } = await supabase.auth.verifyOtp({
-    email,
-    token,
-    type: 'signup',
-  })
-
-  if (error) {
-    redirect(`/verify?email=${encodeURIComponent(email)}&error=${encodeURIComponent(error.message)}`)
+  // Jika berhasil sign up tapi butuh konfirmasi email
+  if (authData?.user && authData?.session === null) {
+    redirect('/login?error=' + encodeURIComponent('Berhasil mendaftar. Silakan cek kotak masuk email Anda (atau folder spam) untuk link verifikasi akun.'))
   }
 
   revalidatePath('/', 'layout')
