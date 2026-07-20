@@ -10,6 +10,8 @@ export async function submitMomDraft(formData: FormData) {
 
     if (!user) {
       return { success: false, error: 'User not authenticated' }
+    }
+    
     // Extract Metadata
     const agenda = formData.get('agenda') as string
     const meeting_date = formData.get('meeting_date') as string
