@@ -9,9 +9,7 @@ export const metadataSchema = z.object({
   meeting_date: z.string().min(1, "Meeting date is required"),
   time: z.string().min(1, "Time is required"),
   location: z.string().min(2, "Location or Venue is required"),
-  type_of_meeting: z.enum(["Review", "Briefing", "Coordination", "Decision Making", "Other"], {
-    errorMap: () => ({ message: "Please select a meeting type" })
-  }),
+  type_of_meeting: z.array(z.string()).min(1, "Please select at least one meeting type"),
   attendees: z.string().min(2, "Attendees are required"),
 });
 

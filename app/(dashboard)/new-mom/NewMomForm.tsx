@@ -23,7 +23,7 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
     agenda: '',
     meeting_date: '',
     time: '',
-    type_of_meeting: '',
+    type_of_meeting: [] as string[],
     location: '',
     attendees: '',
     contentFile: null as File | null,
@@ -70,7 +70,8 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
       submitData.append('agenda', finalData.agenda)
       submitData.append('meeting_date', finalData.meeting_date)
       submitData.append('time', finalData.time)
-      submitData.append('type_of_meeting', finalData.type_of_meeting)
+      // Since it's an array, append each item separately or stringify
+      submitData.append('type_of_meeting', JSON.stringify(finalData.type_of_meeting))
       submitData.append('location', finalData.location)
       submitData.append('attendees', finalData.attendees)
       if (finalData.contentFile) submitData.append('contentFile', finalData.contentFile)
@@ -156,7 +157,7 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
                 <div className="grid grid-cols-3 gap-2">
                   {["Review", "Briefing", "Coordination", "Decision Making", "Other"].map((type) => (
                     <label key={type} className="flex items-center gap-2 text-sm text-gray-700 p-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                      <input type="radio" value={type} {...registerMeta('type_of_meeting')} className="text-telkom-red focus:ring-telkom-red" />
+                      <input type="checkbox" value={type} {...registerMeta('type_of_meeting')} className="text-telkom-red focus:ring-telkom-red rounded" />
                       {type}
                     </label>
                   ))}

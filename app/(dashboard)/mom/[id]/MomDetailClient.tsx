@@ -79,7 +79,9 @@ export default function MomDetailClient({ mom }: { mom: any }) {
   
   // Parse checkboxes
   const types = ["Review", "Briefing", "Coordination", "Decision Making", "Other"]
-  const selectedType = content_json?.type_of_meeting || "Review"
+  const selectedTypes = Array.isArray(content_json?.type_of_meeting) 
+    ? content_json.type_of_meeting 
+    : [content_json?.type_of_meeting].filter(Boolean)
 
   return (
     <div className="max-w-5xl mx-auto mb-20">
@@ -140,7 +142,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                   <div className="flex gap-6 flex-wrap">
                     {types.map(type => (
                       <label key={type} className="flex items-center gap-1 cursor-pointer">
-                        <input type="checkbox" checked={selectedType === type} readOnly className="w-3 h-3 text-black border-gray-400 rounded-none focus:ring-0" />
+                        <input type="checkbox" checked={selectedTypes.includes(type)} readOnly className="w-3 h-3 text-black border-gray-400 rounded-none focus:ring-0" />
                         {type}
                       </label>
                     ))}

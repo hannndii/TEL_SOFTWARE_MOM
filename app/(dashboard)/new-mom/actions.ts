@@ -10,13 +10,17 @@ export async function submitMomDraft(formData: FormData) {
 
     if (!user) {
       return { success: false, error: 'User not authenticated' }
-    }
-
     // Extract Metadata
     const agenda = formData.get('agenda') as string
     const meeting_date = formData.get('meeting_date') as string
     const time = formData.get('time') as string
-    const type_of_meeting = formData.get('type_of_meeting') as string
+    let type_of_meeting = []
+    try {
+      type_of_meeting = JSON.parse(formData.get('type_of_meeting') as string)
+    } catch(e) {
+      // fallback if not a json array
+      type_of_meeting = [formData.get('type_of_meeting') as string]
+    }
     const location = formData.get('location') as string
     const attendees = formData.get('attendees') as string
 
