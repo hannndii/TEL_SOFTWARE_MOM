@@ -63,10 +63,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Failed to download raw file from storage' }, { status: 500 })
     }
 
-    const fileText = await fileBlob.text() // Assuming .txt or easily readable file for MVP
-
     // 4. Generate MoM using Gemini API
-    const systemPrompt = `You are a professional corporate secretary assistant. Your task is to extract meeting minutes from the provided transcript.
+    const systemPrompt = `You are a professional corporate secretary assistant. Your task is to extract meeting minutes from the provided document.
 Output the result strictly as a valid JSON object with the following schema:
 {
   "pembahasan_utama": "String summarizing the main discussion",
@@ -81,13 +79,22 @@ Meeting Topic: ${momData.topic}
 Date: ${momData.meeting_date}
 Participants: ${momData.participants.join(', ')}
 
-Here is the meeting transcript:
-${fileText}
+Please analyze the attached meeting transcript document.
 `
+
+    // Convert blob to base64 for inline data
+    const arrayBuffer = await fileBlob.arrayBuffer()
+    const base64Data = Buffer.from(arrayBuffer).toString('base64')
 
     const response = await ai.models.generateContent({
       model: 'gemini-1.5-flash',
-      contents: systemPrompt + userPrompt,
+      contents: [
+        { role: 'user', parts: [
+            { text: systemPrompt + userPrompt },
+            { inlineData: { data: base64Data, mimeType: fileBlob.type || 'text/plain' } }
+          ] 
+        }
+      ],
       config: {
         responseMimeType: 'application/json',
       }
