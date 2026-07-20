@@ -12,7 +12,7 @@ export default async function LoginPage({
       <div className="w-full max-w-md space-y-8 bg-white p-10 rounded-2xl shadow-xl border border-gray-100">
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-extrabold text-gray-900 tracking-tight">
-            Telkom <span className="text-telkom-red">MoM</span>
+            TEL<span className="text-telkom-red">MOM</span>
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Sign in to access your meeting minutes
