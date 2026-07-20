@@ -1,6 +1,7 @@
 import { FileText, Clock, BarChart3 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/utils/supabase/server";
+import DeleteMomButton from "./DeleteMomButton";
 
 export default async function Dashboard() {
   const supabase = await createClient();
@@ -116,9 +117,12 @@ export default async function Dashboard() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <Link href={`/mom/${mom.id}`} className="text-telkom-navy hover:text-blue-800 text-sm font-medium transition-colors">
-                        View Details
-                      </Link>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link href={`/mom/${mom.id}`} className="text-telkom-navy hover:text-blue-800 text-sm font-medium transition-colors">
+                          View Details
+                        </Link>
+                        <DeleteMomButton momId={mom.id} />
+                      </div>
                     </td>
                   </tr>
                 ))}
