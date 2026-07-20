@@ -219,7 +219,22 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
             </div>
 
             <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center bg-gray-50 hover:bg-gray-100 transition-colors">
-              <Camera className="text-gray-400 mb-4" size={48} />
+              {evidenceFile ? (
+                <div className="mb-4 relative group">
+                  <div className="w-40 h-40 rounded-lg overflow-hidden border border-gray-200 shadow-sm mx-auto relative">
+                    <img 
+                      src={URL.createObjectURL(evidenceFile as File)} 
+                      alt="Evidence Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <p className="text-sm font-medium text-telkom-navy mt-3 truncate max-w-xs mx-auto px-4" title={(evidenceFile as File).name}>
+                    Selected: {(evidenceFile as File).name}
+                  </p>
+                </div>
+              ) : (
+                <Camera className="text-gray-400 mb-4" size={48} />
+              )}
               
               <input 
                 type="file" 
@@ -233,12 +248,10 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
               />
               
               <label htmlFor="evidenceUpload" className="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors mb-2 shadow-sm">
-                Choose Photo
+                {evidenceFile ? 'Change Photo' : 'Choose Photo'}
               </label>
               
-              {evidenceFile ? (
-                <p className="text-sm font-medium text-telkom-navy mt-2">Selected: {(evidenceFile as File).name}</p>
-              ) : (
+              {!evidenceFile && (
                 <p className="text-xs text-gray-500 mt-2">Supported formats: JPG, PNG (Max 3MB)</p>
               )}
             </div>
