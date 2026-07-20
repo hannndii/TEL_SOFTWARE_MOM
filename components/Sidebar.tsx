@@ -6,7 +6,7 @@ export default function Sidebar() {
     <aside className="w-64 bg-telkom-navy text-white min-h-screen flex flex-col shadow-lg shrink-0">
       <div className="p-6 border-b border-white/10">
         <h1 className="text-2xl font-bold tracking-tight">
-          Telkom <span className="text-telkom-red">MoM</span>
+          TEL <span className="text-telkom-red">MoM</span>
         </h1>
         <p className="text-xs text-white/60 mt-1">AI-Powered Meeting Minutes</p>
       </div>
