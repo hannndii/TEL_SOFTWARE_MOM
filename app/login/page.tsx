@@ -26,7 +26,7 @@ export default async function LoginPage({
           </div>
         )}
 
-        <form className="mt-8 space-y-6">
+        <form action={login} className="mt-8 space-y-6">
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="sr-only">Email address</label>
@@ -69,7 +69,7 @@ export default async function LoginPage({
           </div>
 
           <button 
-            formAction={login} 
+            type="submit"
             className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-telkom-red hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-telkom-red transition-colors shadow-sm"
           >
             Sign in

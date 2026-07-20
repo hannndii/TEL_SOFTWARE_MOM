@@ -30,10 +30,15 @@ export async function signup(formData: FormData) {
     password: formData.get('password') as string,
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  const { error, data: authData } = await supabase.auth.signUp(data)
 
   if (error) {
-    redirect('/login?error=' + encodeURIComponent(error.message))
+    redirect('/signup?error=' + encodeURIComponent(error.message))
+  }
+
+  // Jika berhasil sign up tapi butuh konfirmasi email
+  if (authData?.user && authData?.session === null) {
+    redirect('/login?error=' + encodeURIComponent('Berhasil mendaftar. Silakan cek email Anda untuk verifikasi atau hubungi admin.'))
   }
 
   revalidatePath('/', 'layout')
