@@ -52,7 +52,7 @@ export default async function Dashboard() {
             <FileText size={24} />
           </div>
           <div>
-            <p className="text-sm text-gray-500 font-medium">Total MoM</p>
+            <p className="text-sm text-gray-500 font-medium">Total Minutes of Meeting</p>
             <p className="text-2xl font-bold text-gray-900 mt-1">{totalMom || 0}</p>
           </div>
         </div>
