@@ -1,4 +1,5 @@
-import { login, signup } from './actions'
+import { login } from './actions'
+import Link from 'next/link'
 
 export default async function LoginPage({
   searchParams,
@@ -67,21 +68,20 @@ export default async function LoginPage({
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <button 
-              formAction={login} 
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-telkom-red hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-telkom-red transition-colors shadow-sm"
-            >
-              Sign in
-            </button>
-            <button 
-              formAction={signup} 
-              className="group relative w-full flex justify-center py-3 px-4 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-telkom-red transition-colors"
-            >
-              Sign up
-            </button>
-          </div>
+          <button 
+            formAction={login} 
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-telkom-red hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-telkom-red transition-colors shadow-sm"
+          >
+            Sign in
+          </button>
         </form>
+
+        <div className="text-center mt-4 text-sm text-gray-600">
+          Don't have an account?{' '}
+          <Link href="/signup" className="font-medium text-telkom-navy hover:text-blue-800">
+            Sign up here
+          </Link>
+        </div>
 
         <div className="mt-6">
           <div className="relative">
