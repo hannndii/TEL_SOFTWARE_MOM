@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import MomDetailClient from './MomDetailClient'
 
-export default async function MomDetailPage({ params }: { params: { id: string } }) {
+export default async function MomDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
