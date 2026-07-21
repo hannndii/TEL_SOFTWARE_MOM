@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { updateSession } from './utils/supabase/supabase-proxy'
+import { updateSession } from './utils/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
   try {
