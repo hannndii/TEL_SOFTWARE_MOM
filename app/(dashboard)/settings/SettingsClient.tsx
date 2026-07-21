@@ -302,27 +302,40 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                   </div>
                 )}
 
-                <form id="password-form" action={handlePasswordUpdate} className="space-y-4 max-w-md">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                    <PasswordInput 
-                      id="password"
-                      name="password"
-                      placeholder="At least 6 characters"
-                      required
-                      minLength={6}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                    <PasswordInput 
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      placeholder="Repeat new password"
-                      required
-                      minLength={6}
-                    />
-                  </div>
+                        <form id="password-form" action={handlePasswordUpdate} className="space-y-6 max-w-xl">
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-1.5">Current Password</label>
+                              <PasswordInput 
+                                id="currentPassword"
+                                name="currentPassword"
+                                placeholder="Enter your current password"
+                                required
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-1.5">New Password</label>
+                              <PasswordInput 
+                                id="password"
+                                name="password"
+                                placeholder="At least 6 characters"
+                                required
+                                minLength={6}
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-sm font-medium text-slate-700 mb-1.5">Confirm New Password</label>
+                              <PasswordInput 
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                placeholder="Repeat new password"
+                                required
+                                minLength={6}
+                              />
+                            </div>
+                          </div>         
                   <button 
                     type="submit"
                     disabled={isPending}

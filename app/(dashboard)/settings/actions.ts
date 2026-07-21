@@ -33,11 +33,16 @@ export async function updateProfile(fullName: string, avatarUrl: string | null) 
 }
 
 export async function updatePassword(formData: FormData) {
+  const currentPassword = formData.get('currentPassword') as string
   const password = formData.get('password') as string
   const confirmPassword = formData.get('confirmPassword') as string
 
+  if (!currentPassword) {
+    return { error: 'Current password is required' }
+  }
+
   if (!password || password.length < 6) {
-    return { error: 'Password must be at least 6 characters long' }
+    return { error: 'New password must be at least 6 characters long' }
   }
 
   if (password !== confirmPassword) {
@@ -47,7 +52,9 @@ export async function updatePassword(formData: FormData) {
   const supabase = await createClient()
   
   const { error } = await supabase.auth.updateUser({
-    password: password
+    password: password,
+    // @ts-ignore: Supabase v2.102.0+ supports current_password but types might be outdated
+    current_password: currentPassword
   })
 
   if (error) {
