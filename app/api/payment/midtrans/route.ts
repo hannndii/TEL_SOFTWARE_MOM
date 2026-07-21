@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     const { email } = await request.json()
-    const order_id = `TELMOM-PREM-${crypto.randomUUID()}`
+    const order_id = `myTELMOM-PREM-${crypto.randomUUID()}`
 
     const serverKey = process.env.MIDTRANS_SERVER_KEY
     if (!serverKey) {
@@ -31,15 +31,15 @@ export async function POST(request: Request) {
       },
       item_details: [
         {
-          id: 'TELMOM-PREMIUM',
+          id: 'myTELMOM-PREMIUM',
           price: 49000,
           quantity: 1,
-          name: 'TELMOM Premium (Monthly)'
+          name: 'myTELMOM Premium (Monthly)'
         }
       ],
       customer_details: {
         email: email || user.email,
-        first_name: 'TELMOM',
+        first_name: 'myTELMOM',
         last_name: 'Customer'
       },
       callbacks: {

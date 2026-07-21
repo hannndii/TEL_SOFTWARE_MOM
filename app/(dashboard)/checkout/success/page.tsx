@@ -48,7 +48,7 @@ export default async function CheckoutSuccessPage({
   
   // DEMO MODE BYPASS: Midtrans Sandbox seringkali telat menyimpan transaksi atau mengembalikan 404 
   // setelah simulator selesai. Untuk keperluan demo portofolio, kita anggap sukses jika order_id valid.
-  if (midtransStatus?.status_code === '404' && typeof order_id === 'string' && order_id.startsWith('TELMOM-PREM-')) {
+  if (midtransStatus?.status_code === '404' && typeof order_id === 'string' && order_id.startsWith('myTELMOM-PREM-')) {
     status = 'settlement (demo simulated)';
     isSuccess = true;
   }
@@ -104,7 +104,7 @@ export default async function CheckoutSuccessPage({
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Payment Successful!</h2>
             <p className="text-gray-500 mb-8">
               Thank you! Your payment for Order <b>{order_id}</b> has been verified. 
-              Your account is now upgraded to TELMOM Premium.
+              Your account is now upgraded to myTELMOM Premium.
             </p>
           </>
         )}

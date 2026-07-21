@@ -57,7 +57,7 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free", userNa
     <aside className="w-64 bg-slate-900 text-white h-full flex flex-col shadow-xl border-r border-slate-800 shrink-0 overflow-y-auto relative">
       <div className="p-6 border-b border-slate-800 shrink-0">
         <h1 className="text-2xl font-bold tracking-tight">
-          TEL<span className="text-telkom-red">MOM</span>
+          my<span className="text-telkom-red">TELMOM</span>
         </h1>
         <p className="text-xs text-slate-400 mt-1">AI-Powered Meeting Minutes</p>
       </div>

@@ -17,7 +17,7 @@ export default async function SignupPage({
             Create an Account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Welcome to <span className="text-telkom-red font-bold">TELMOM</span> and Join Now!
+            Welcome to <span className="text-telkom-red font-bold">myTELMOM</span> and Join Now!
           </p>
         </div>
         
