@@ -1,10 +1,14 @@
-import { FileText, Clock, BarChart3, Plus, ChevronRight, FileArchive } from "lucide-react";
-import Link from "next/link";
+import { FileText, Clock, BarChart3, Plus, ChevronRight, FileArchive, ArrowRight } from "lucide-react";
+import Link from 'next/link'
+import DashboardTableControls from './DashboardTableControls'
 import { createClient } from "@/utils/supabase/server";
 import DeleteMomButton from "./DeleteMomButton";
 
-export default async function Dashboard() {
+export default async function Dashboard(props: { searchParams?: Promise<{ search?: string, status?: string }> }) {
   const supabase = await createClient();
+  const searchParams = await props.searchParams;
+  const search = searchParams?.search || '';
+  const statusFilter = searchParams?.status || 'All';
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return null;
@@ -26,12 +30,21 @@ export default async function Dashboard() {
     .eq('user_id', user.id)
     .eq('status', 'draft');
 
-  const { data: recentMoms } = await supabase
+  let momsQuery = supabase
     .from('meeting_mom')
     .select('*')
-    .eq('user_id', user.id)
+    .eq('user_id', user.id);
+
+  if (search) {
+    momsQuery = momsQuery.ilike('topic', `%${search}%`);
+  }
+  if (statusFilter && statusFilter !== 'All') {
+    momsQuery = momsQuery.eq('status', statusFilter);
+  }
+
+  const { data: recentMoms } = await momsQuery
     .order('updated_at', { ascending: false })
-    .limit(5);
+    .limit(10);
 
   const isPremium = userProfile?.tier === 'premium';
 
@@ -98,28 +111,28 @@ export default async function Dashboard() {
         </div>
 
         {/* 3. PROFESSIONAL TABLE */}
-        <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200 overflow-hidden mx-4 md:mx-0">
-          <div className="p-6 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-              <FileArchive size={20} className="text-telkom-navy" />
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mx-4 md:mx-0 shadow-sm mb-12">
+          <div className="p-5 border-b border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <h2 className="text-lg font-bold text-gray-900">
               Recent Meeting Minutes
             </h2>
+            <DashboardTableControls />
           </div>
           
           {recentMoms && recentMoms.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-white border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider divide-x divide-gray-200">
+                  <tr className="bg-white border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider">
                     <th className="px-6 py-4 font-bold w-1/2">Meeting Topic</th>
                     <th className="px-6 py-4 font-bold">Date</th>
                     <th className="px-6 py-4 font-bold">Status</th>
                     <th className="px-6 py-4 font-bold text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-gray-100 bg-white">
                   {recentMoms.map((mom) => (
-                    <tr key={mom.id} className="hover:bg-blue-50/50 transition-colors group divide-x divide-gray-200">
+                    <tr key={mom.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="px-6 py-5">
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-gray-900 group-hover:text-telkom-navy transition-colors">{mom.topic}</span>
@@ -128,29 +141,28 @@ export default async function Dashboard() {
                       </td>
                       <td className="px-6 py-5">
                         <div className="text-sm text-gray-700 font-medium">
-                          {new Date(mom.meeting_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'short', day: 'numeric' })}
+                          {new Date(mom.meeting_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold capitalize border ${
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold capitalize ${
                           mom.status === 'draft' 
-                            ? 'bg-yellow-50 text-yellow-700 border-yellow-200' 
-                            : 'bg-green-50 text-green-700 border-green-200'
+                            ? 'bg-amber-100 text-amber-700' 
+                            : 'bg-green-100 text-green-700'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full mr-2 ${mom.status === 'draft' ? 'bg-yellow-500' : 'bg-green-500'}`}></span>
+                          {mom.status === 'draft' && <span className="w-1.5 h-1.5 rounded-full mr-2 bg-amber-500"></span>}
                           {mom.status}
                         </span>
                       </td>
                       <td className="px-6 py-5 text-right">
-                        <div className="flex items-center justify-end gap-4 opacity-80 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
                           <Link 
                             href={`/mom/${mom.id}`} 
-                            className="flex items-center text-telkom-navy hover:text-blue-800 text-sm font-bold transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-md"
+                            className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-1.5 rounded-md"
                           >
-                            View
+                            {mom.status === 'draft' ? 'Continue' : 'View'}
                             <ChevronRight size={16} className="ml-1" />
                           </Link>
-                          <div className="h-4 w-px bg-gray-200"></div>
                           <DeleteMomButton momId={mom.id} />
                         </div>
                       </td>
@@ -158,6 +170,11 @@ export default async function Dashboard() {
                   ))}
                 </tbody>
               </table>
+              <div className="p-4 border-t border-gray-100 text-center">
+                <Link href="#" className="inline-flex items-center text-blue-600 text-sm font-semibold hover:text-blue-800 transition-colors">
+                  View all minute of meeting <ArrowRight size={16} className="ml-1" />
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="p-8 text-center py-20 flex flex-col items-center">
