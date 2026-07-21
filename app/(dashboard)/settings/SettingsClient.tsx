@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useTransition } from 'react'
-import { User, Shield, CreditCard, Loader2, CheckCircle2, AlertTriangle, Key, Copy, Check } from 'lucide-react'
+import { useState, useTransition, useRef } from 'react'
+import { User, Shield, CreditCard, Loader2, CheckCircle2, AlertTriangle, Key, Copy, Check, Camera, Edit2, Save, X, Crown } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { updatePassword, deleteAccount } from './actions'
+import { updatePassword, deleteAccount, updateProfile } from './actions'
+import { createClient } from '@/utils/supabase/client'
 import PasswordInput from '@/components/PasswordInput'
+import Image from 'next/image'
 
 type Tab = 'profile' | 'security' | 'billing'
 
@@ -14,6 +16,14 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
   const [isUpgrading, setIsUpgrading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [copied, setCopied] = useState(false)
+  
+  // Profile Editing States
+  const [fullName, setFullName] = useState(userProfile?.full_name || '')
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const supabase = createClient()
 
   // Security Tab States
   const [isPending, startTransition] = useTransition()
@@ -42,6 +52,47 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
       alert('Network error')
       setIsUpgrading(false)
     }
+  }
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('File too large. Maximum size is 2MB.')
+      return
+    }
+
+    setIsUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${userProfile.id}-${Math.random()}.${fileExt}`
+      
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file, { upsert: true })
+        
+      if (uploadError) throw uploadError
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName)
+
+      await updateProfile(fullName, publicUrl)
+    } catch (error: any) {
+      alert('Error uploading avatar: ' + error.message)
+    } finally {
+      setIsUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
+  const handleSaveName = async () => {
+    if (!fullName.trim()) return
+    setIsSavingProfile(true)
+    await updateProfile(fullName, null)
+    setIsSavingProfile(false)
+    setIsEditingName(false)
   }
 
   const handlePasswordUpdate = async (formData: FormData) => {
@@ -97,14 +148,74 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                   
                   {/* Avatar Section */}
                   <div className="flex flex-col items-center space-y-5">
-                    <div className="w-28 h-28 rounded-full bg-slate-800 flex items-center justify-center text-white text-4xl font-bold shadow-sm ring-4 ring-slate-50">
-                      {userEmail.charAt(0).toUpperCase()}
+                    <div className="relative group">
+                      <div className="w-28 h-28 rounded-full bg-slate-800 flex items-center justify-center text-white text-4xl font-bold shadow-sm ring-4 ring-slate-50 overflow-hidden relative">
+                        {userProfile?.avatar_url ? (
+                          <Image src={userProfile.avatar_url} alt="Avatar" fill className="object-cover" />
+                        ) : (
+                          userEmail.charAt(0).toUpperCase()
+                        )}
+                        {isUploading && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                            <Loader2 size={24} className="text-white animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                      <button 
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-md border border-slate-200 text-slate-600 hover:text-telkom-red transition-colors group-hover:scale-110"
+                        title="Change Avatar"
+                      >
+                        <Camera size={16} />
+                      </button>
+                      <input 
+                        type="file" 
+                        ref={fileInputRef} 
+                        onChange={handleAvatarUpload} 
+                        accept="image/*" 
+                        className="hidden" 
+                      />
                     </div>
-                    <div className="text-center space-y-2">
-                      <h3 className="text-xl font-bold text-slate-900">{userEmail.split('@')[0]}</h3>
-                      <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full border ${isPremium ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-50 text-slate-700 border-slate-200'}`}>
-                        {isPremium ? 'Premium Member' : 'Free Member'}
-                      </span>
+                    
+                    <div className="text-center space-y-3">
+                      {isEditingName ? (
+                        <div className="flex items-center gap-2">
+                          <input 
+                            type="text" 
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            className="px-3 py-1.5 border border-slate-300 rounded-lg text-center text-lg font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-telkom-red w-48"
+                            placeholder="Your Name"
+                            autoFocus
+                          />
+                          <button onClick={handleSaveName} disabled={isSavingProfile} className="p-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition-colors">
+                            {isSavingProfile ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                          </button>
+                          <button onClick={() => {setIsEditingName(false); setFullName(userProfile?.full_name || '')}} className="p-1.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2 group">
+                          <h3 className="text-xl font-bold text-slate-900">{userProfile?.full_name || userEmail.split('@')[0]}</h3>
+                          <button onClick={() => setIsEditingName(true)} className="text-slate-400 hover:text-telkom-red opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Edit2 size={14} />
+                          </button>
+                        </div>
+                      )}
+                      
+                      {isPremium ? (
+                        <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-yellow-700/10 via-yellow-500/10 to-yellow-600/10 border border-yellow-500/30 text-yellow-700 shadow-[0_0_15px_rgba(234,179,8,0.15)] relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+                          <Crown size={14} className="text-yellow-600 drop-shadow-sm" />
+                          <span className="text-xs font-bold tracking-wide uppercase">Premium Member</span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-600">
+                          <span className="text-xs font-semibold">Free Member</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 

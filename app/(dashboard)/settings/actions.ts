@@ -5,6 +5,33 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
+export async function updateProfile(fullName: string, avatarUrl: string | null) {
+  const supabase = await createClient()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+  if (userError || !user) {
+    return { error: 'Not authenticated' }
+  }
+
+  // Update public.users table
+  const { error } = await supabase
+    .from('users')
+    .update({ 
+      full_name: fullName, 
+      ...(avatarUrl !== null && { avatar_url: avatarUrl }) 
+    })
+    .eq('id', user.id)
+
+  if (error) {
+    console.error("Failed to update profile:", error)
+    return { error: 'Failed to update profile' }
+  }
+
+  revalidatePath('/settings')
+  revalidatePath('/')
+  return { success: true }
+}
+
 export async function updatePassword(formData: FormData) {
   const password = formData.get('password') as string
   const confirmPassword = formData.get('confirmPassword') as string

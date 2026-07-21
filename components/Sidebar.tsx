@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from "next/link";
+import Image from "next/image";
 import { LayoutDashboard, FileText, Settings, LogOut } from "lucide-react";
 import { logout } from "@/app/login/actions";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -9,14 +10,17 @@ import { usePathname, useSearchParams } from "next/navigation";
 interface SidebarProps {
   userEmail?: string;
   userTier?: string;
+  userName?: string;
+  userAvatar?: string;
 }
 
-export default function Sidebar({ userEmail = "Guest", userTier = "free" }: SidebarProps) {
+export default function Sidebar({ userEmail = "Guest", userTier = "free", userName, userAvatar }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams?.get('tab') || 'profile';
   
-  const initial = userEmail.charAt(0).toUpperCase();
+  const initial = userName ? userName.charAt(0).toUpperCase() : userEmail.charAt(0).toUpperCase();
+  const displayName = userName || userEmail.split('@')[0];
   const displayTier = userTier === 'premium' ? 'Premium Tier' : 'Free Tier';
 
   // Helper function to check if link is active
@@ -65,7 +69,7 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
         </Link>
         <Link href="/new-mom" className={getLinkClasses('/new-mom')}>
           <FileText size={20} className={getIconClasses('/new-mom')} />
-          <span className={getTextClasses('/new-mom')}>Generate AI MoM</span>
+          <span className={getTextClasses('/new-mom')}>Create MoM</span>
         </Link>
         
         {/* Settings Dropdown */}
@@ -128,16 +132,20 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
 
         <button 
           onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-          className="w-full flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-800 transition-colors text-left"
+          className="w-full flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-800 transition-colors text-left group"
         >
-          <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold shadow-inner shrink-0 text-sm">
-            {initial}
+          <div className="relative w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold shadow-inner shrink-0 text-sm overflow-hidden border border-slate-700 group-hover:border-slate-500 transition-colors">
+            {userAvatar ? (
+              <Image src={userAvatar} alt="Avatar" fill className="object-cover" />
+            ) : (
+              initial
+            )}
           </div>
           <div className="overflow-hidden flex-1">
-            <p className="text-sm font-semibold truncate text-white" title={userEmail}>{userEmail.split('@')[0]}</p>
+            <p className="text-sm font-semibold truncate text-white" title={displayName}>{displayName}</p>
             <p className="text-xs text-slate-400">{displayTier}</p>
           </div>
-          <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-4 h-4 text-slate-500 group-hover:text-slate-300 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
           </svg>
         </button>

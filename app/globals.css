@@ -7,6 +7,11 @@
   
   --color-background: var(--color-telkom-bg);
   --color-foreground: #171717;
+
+  --animate-shimmer: shimmer 2s infinite;
+  @keyframes shimmer {
+    100% { transform: translateX(100%); }
+  }
 }
 
 @layer base {
