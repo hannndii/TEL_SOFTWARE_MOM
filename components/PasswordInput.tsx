@@ -9,9 +9,10 @@ interface PasswordInputProps {
   placeholder: string
   autoComplete?: string
   required?: boolean
+  minLength?: number
 }
 
-export default function PasswordInput({ id, name, placeholder, autoComplete, required }: PasswordInputProps) {
+export default function PasswordInput({ id, name, placeholder, autoComplete, required, minLength }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState(false)
 
   return (
@@ -23,6 +24,7 @@ export default function PasswordInput({ id, name, placeholder, autoComplete, req
         type={showPassword ? "text" : "password"} 
         autoComplete={autoComplete} 
         required={required} 
+        minLength={minLength}
         className="appearance-none relative block w-full px-4 py-3 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all sm:text-sm" 
         placeholder={placeholder} 
       />

@@ -2,13 +2,15 @@
 
 import { useState, useTransition } from 'react'
 import { User, Shield, CreditCard, Loader2, CheckCircle2, AlertTriangle, Key } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { updatePassword, deleteAccount } from './actions'
+import PasswordInput from '@/components/PasswordInput'
 
 type Tab = 'profile' | 'security' | 'billing'
 
 export default function SettingsClient({ userProfile, userEmail }: { userProfile: any, userEmail: string }) {
-  const [activeTab, setActiveTab] = useState<Tab>('profile')
+  const searchParams = useSearchParams()
+  const activeTab = (searchParams.get('tab') as Tab) || 'profile'
   const [isUpgrading, setIsUpgrading] = useState(false)
   const [success, setSuccess] = useState(false)
   
@@ -82,82 +84,49 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto flex flex-col md:flex-row gap-8">
-        {/* Sidebar settings */}
-        <div className="w-full md:w-64 shrink-0 space-y-1">
-          <button 
-            onClick={() => setActiveTab('profile')}
-            className={`w-full flex items-center gap-3 px-4 py-3 font-medium rounded-lg transition-colors ${
-              activeTab === 'profile' 
-                ? 'bg-white text-telkom-red shadow-sm border border-gray-200' 
-                : 'text-gray-600 hover:bg-gray-100 border border-transparent'
-            }`}
-          >
-            <User size={20} /> Profile
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('security')}
-            className={`w-full flex items-center gap-3 px-4 py-3 font-medium rounded-lg transition-colors ${
-              activeTab === 'security' 
-                ? 'bg-white text-telkom-red shadow-sm border border-gray-200' 
-                : 'text-gray-600 hover:bg-gray-100 border border-transparent'
-            }`}
-          >
-            <Shield size={20} /> Security
-          </button>
-          
-          <button 
-            onClick={() => setActiveTab('billing')}
-            className={`w-full flex items-center gap-3 px-4 py-3 font-medium rounded-lg transition-colors ${
-              activeTab === 'billing' 
-                ? 'bg-white text-telkom-red shadow-sm border border-gray-200' 
-                : 'text-gray-600 hover:bg-gray-100 border border-transparent'
-            }`}
-          >
-            <CreditCard size={20} /> Billing
-          </button>
-        </div>
-
+      <div className="max-w-4xl mx-auto">
         {/* Content Area */}
-        <div className="flex-1 space-y-6">
+        <div className="w-full space-y-6">
           
           {/* PROFILE TAB */}
           {activeTab === 'profile' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
               <div className="bg-white p-6 md:p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
-                <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="flex flex-col items-center space-y-8">
                   
                   {/* Avatar Section */}
                   <div className="flex flex-col items-center space-y-4">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-telkom-red to-orange-500 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-telkom-red to-orange-500 flex items-center justify-center text-white text-4xl font-bold shadow-xl ring-4 ring-red-50">
                       {userEmail.charAt(0).toUpperCase()}
                     </div>
-                    <span className={`px-3 py-1 text-xs font-bold rounded-full ${isPremium ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
-                      {isPremium ? 'Premium Member' : 'Free Member'}
-                    </span>
+                    <div className="text-center">
+                      <h3 className="text-xl font-bold text-gray-900">{userEmail.split('@')[0]}</h3>
+                      <span className={`inline-block mt-2 px-4 py-1.5 text-xs font-bold rounded-full border ${isPremium ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
+                        {isPremium ? '⭐ Premium Member' : 'Free Member'}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Info Section */}
-                  <div className="flex-1 space-y-6 w-full">
-                    <div className="border-b border-gray-100 pb-4">
+                  <div className="w-full max-w-2xl space-y-6">
+                    <div className="border-b border-gray-100 pb-4 text-center">
                       <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
                       <p className="text-sm text-gray-500 mt-1">Your basic account details.</p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-6">
-                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <label className="flex items-center gap-2 text-sm font-bold text-gray-600 mb-1">
-                          <User size={16} /> Email Address
+                      <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm transition-transform hover:-translate-y-1">
+                        <label className="flex items-center gap-2 text-sm font-bold text-gray-600 mb-2">
+                          <User size={18} className="text-telkom-red" /> Email Address
                         </label>
-                        <p className="text-gray-900 font-medium truncate" title={userEmail}>{userEmail}</p>
+                        <p className="text-gray-900 font-medium truncate text-lg" title={userEmail}>{userEmail}</p>
                       </div>
                       
-                      <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <label className="flex items-center gap-2 text-sm font-bold text-gray-600 mb-1">
-                          <Shield size={16} /> Account ID
+                      <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm transition-transform hover:-translate-y-1">
+                        <label className="flex items-center gap-2 text-sm font-bold text-gray-600 mb-2">
+                          <Shield size={18} className="text-telkom-navy" /> Account ID
                         </label>
-                        <p className="text-gray-500 text-sm font-mono truncate" title={userProfile?.id}>{userProfile?.id}</p>
+                        <p className="text-gray-500 text-sm font-mono truncate bg-gray-200/50 px-2 py-1 rounded" title={userProfile?.id}>{userProfile?.id}</p>
                       </div>
                     </div>
                   </div>
@@ -186,24 +155,22 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                 <form id="password-form" action={handlePasswordUpdate} className="space-y-4 max-w-md">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                    <input 
-                      type="password" 
+                    <PasswordInput 
+                      id="password"
                       name="password"
+                      placeholder="At least 6 characters"
                       required
                       minLength={6}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-telkom-red/50 transition-all"
-                      placeholder="At least 6 characters"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                    <input 
-                      type="password" 
+                    <PasswordInput 
+                      id="confirmPassword"
                       name="confirmPassword"
+                      placeholder="Repeat new password"
                       required
                       minLength={6}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-telkom-red/50 transition-all"
-                      placeholder="Repeat new password"
                     />
                   </div>
                   <button 

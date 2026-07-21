@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import SettingsClient from "./SettingsClient";
+import { Suspense } from "react";
 
 export const dynamic = 'force-dynamic';
 
@@ -15,5 +16,9 @@ export default async function SettingsPage() {
     .eq('id', user.id)
     .single();
 
-  return <SettingsClient userProfile={userProfile} userEmail={user.email || ''} />;
+  return (
+    <Suspense fallback={<div className="p-8 flex justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-telkom-red"></div></div>}>
+      <SettingsClient userProfile={userProfile} userEmail={user.email || ''} />
+    </Suspense>
+  );
 }
