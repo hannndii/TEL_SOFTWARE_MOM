@@ -30,10 +30,10 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
         </Link>
         <Link
           href="/new-mom"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-telkom-red/10 text-white hover:bg-telkom-red/20 border border-telkom-red/20 hover:border-telkom-red/50 transition-all group"
         >
-          <FileText size={20} />
-          <span className="font-medium">New Minute of Meeting</span>
+          <FileText size={20} className="text-red-400 group-hover:text-red-300 transition-colors" />
+          <span className="font-semibold">Generate AI MoM</span>
         </Link>
         <Link
           href="/settings"

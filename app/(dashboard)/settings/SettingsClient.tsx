@@ -206,57 +206,107 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
 
           {/* BILLING TAB */}
           {activeTab === 'billing' && (
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Subscription Plan</h2>
-              
-              <div className={`p-6 rounded-xl border-2 ${isPremium ? 'border-telkom-red bg-red-50/30' : 'border-gray-200 bg-gray-50'}`}>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                      {isPremium ? 'Premium Tier' : 'Free Tier'}
-                      {isPremium && <CheckCircle2 size={20} className="text-telkom-red" />}
-                    </h3>
-                    <p className="text-gray-500 text-sm mt-1">
-                      {isPremium ? 'You have access to unlimited generation and audio uploads.' : 'Limited to 3 generations per day and text-only uploads.'}
-                    </p>
-                  </div>
-                  {!isPremium && (
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-gray-900">Rp 0</p>
-                      <p className="text-xs text-gray-500">/month</p>
+            <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900">Subscription Plan</h2>
+                  <p className="text-gray-500 mt-2">Manage your billing and choose the right plan for your team's needs.</p>
+                </div>
+                
+                {/* Current Plan Status Banner */}
+                <div className={`p-4 rounded-xl border mb-8 flex items-center justify-between ${isPremium ? 'border-green-200 bg-green-50' : 'border-blue-100 bg-blue-50'}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isPremium ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                      {isPremium ? <CheckCircle2 size={24} /> : <Shield size={24} />}
                     </div>
-                  )}
-                </div>
-
-                <div className="mt-6 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Daily Quota Left:</span>
-                    <span className="font-bold text-gray-900">{isPremium ? 'Unlimited' : `${userProfile?.daily_quota_left ?? 3} / 3`}</span>
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Current Plan</p>
+                      <p className={`text-lg font-bold ${isPremium ? 'text-green-700' : 'text-blue-700'}`}>{isPremium ? 'Premium Tier' : 'Free Tier'}</p>
+                    </div>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Audio/Video Support:</span>
-                    <span className="font-bold text-gray-900">{isPremium ? 'Enabled' : 'Disabled'}</span>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-gray-600">Daily Quota Left</p>
+                    <p className="text-xl font-bold text-gray-900">{isPremium ? 'Unlimited' : `${userProfile?.daily_quota_left ?? 3} / 3`}</p>
                   </div>
                 </div>
 
-                {!isPremium && (
-                  <div className="mt-8 pt-6 border-t border-gray-200">
-                    <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                      <div>
-                        <h4 className="font-bold text-gray-900">Upgrade to Premium</h4>
-                        <p className="text-sm text-gray-500">Unlock full capabilities of TELMOM AI.</p>
+                {/* Plan Comparison */}
+                <div className="grid md:grid-cols-2 gap-6">
+                  {/* Free Plan */}
+                  <div className={`relative p-6 rounded-2xl border-2 transition-all ${!isPremium ? 'border-gray-900 shadow-lg' : 'border-gray-100 hover:border-gray-200 opacity-70'}`}>
+                    {!isPremium && (
+                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+                        CURRENT
                       </div>
+                    )}
+                    <h3 className="text-xl font-bold text-gray-900">Starter</h3>
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold text-gray-900">Rp 0</span>
+                      <span className="text-sm font-medium text-gray-500">/ forever</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">Perfect for trying out our AI capabilities.</p>
+                    
+                    <ul className="mt-6 space-y-3">
+                      <li className="flex items-start gap-3 text-sm text-gray-700">
+                        <CheckCircle2 size={18} className="text-gray-400 shrink-0 mt-0.5" />
+                        3 AI MoM Generations per day
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-gray-700">
+                        <CheckCircle2 size={18} className="text-gray-400 shrink-0 mt-0.5" />
+                        Text / Document upload only
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-gray-700 opacity-50">
+                        <div className="w-[18px] h-[18px] border-2 border-gray-300 rounded-full shrink-0 mt-0.5"></div>
+                        No Audio / Video processing
+                      </li>
+                    </ul>
+                  </div>
+
+                  {/* Premium Plan */}
+                  <div className={`relative p-6 rounded-2xl border-2 transition-all ${isPremium ? 'border-telkom-red shadow-lg bg-red-50/10' : 'border-red-100 hover:border-telkom-red/50 bg-white'}`}>
+                    {isPremium ? (
+                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-telkom-red text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide flex items-center gap-1">
+                        <CheckCircle2 size={14} /> ACTIVE
+                      </div>
+                    ) : (
+                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm">
+                        RECOMMENDED
+                      </div>
+                    )}
+                    <h3 className="text-xl font-bold text-gray-900 text-telkom-navy">Professional</h3>
+                    <div className="mt-2 flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold text-gray-900">Rp 99k</span>
+                      <span className="text-sm font-medium text-gray-500">/ month</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">Unlock unlimited potential for your business.</p>
+                    
+                    <ul className="mt-6 space-y-3 mb-8">
+                      <li className="flex items-start gap-3 text-sm text-gray-900 font-medium">
+                        <CheckCircle2 size={18} className="text-telkom-red shrink-0 mt-0.5" />
+                        Unlimited AI Generations
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-gray-900 font-medium">
+                        <CheckCircle2 size={18} className="text-telkom-red shrink-0 mt-0.5" />
+                        Audio & Video File Support
+                      </li>
+                      <li className="flex items-start gap-3 text-sm text-gray-900 font-medium">
+                        <CheckCircle2 size={18} className="text-telkom-red shrink-0 mt-0.5" />
+                        Priority AI Processing Queue
+                      </li>
+                    </ul>
+
+                    {!isPremium && (
                       <button 
                         onClick={handleUpgrade}
                         disabled={isUpgrading || success}
-                        className="w-full sm:w-auto bg-telkom-navy hover:bg-blue-900 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 disabled:opacity-70"
+                        className="w-full bg-telkom-red hover:bg-red-600 text-white py-3 rounded-xl font-bold transition-all shadow-[0_4px_14px_0_rgba(229,42,58,0.39)] hover:shadow-[0_6px_20px_rgba(229,42,58,0.23)] hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:translate-y-0"
                       >
                         {isUpgrading ? <Loader2 size={20} className="animate-spin" /> : null}
-                        {success ? 'Upgraded Successfully!' : 'Upgrade Now'}
+                        {success ? 'Upgraded Successfully!' : 'Upgrade to Professional'}
                       </button>
-                    </div>
+                    )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           )}

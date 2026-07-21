@@ -113,7 +113,7 @@ export default async function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-white border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider">
+                  <tr className="bg-white border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider divide-x divide-gray-100">
                     <th className="px-6 py-4 font-bold w-1/2">Meeting Topic</th>
                     <th className="px-6 py-4 font-bold">Date</th>
                     <th className="px-6 py-4 font-bold">Status</th>
@@ -122,7 +122,7 @@ export default async function Dashboard() {
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white">
                   {recentMoms.map((mom) => (
-                    <tr key={mom.id} className="hover:bg-blue-50/50 transition-colors group">
+                    <tr key={mom.id} className="hover:bg-blue-50/50 transition-colors group divide-x divide-gray-100">
                       <td className="px-6 py-5">
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-gray-900 group-hover:text-telkom-navy transition-colors">{mom.topic}</span>
