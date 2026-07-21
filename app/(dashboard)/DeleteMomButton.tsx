@@ -46,16 +46,16 @@ export default function DeleteMomButton({ momId }: { momId: string }) {
               <button 
                 onClick={() => setShowModal(false)}
                 disabled={isDeleting}
-                className="px-4 py-2 font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="bg-white border border-slate-300 text-slate-700 px-5 py-2 rounded-md font-medium hover:bg-slate-50 transition-colors shadow-sm"
               >
                 Batal
               </button>
               <button 
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
+                className="bg-red-600 text-white px-5 py-2 rounded-md font-medium hover:bg-red-700 transition-colors shadow-sm flex items-center gap-2"
               >
-                {isDeleting ? <Loader2 size={16} className="animate-spin" /> : null}
+                {isDeleting && <Loader2 size={16} className="animate-spin" />}
                 {isDeleting ? "Menghapus..." : "Ya, Hapus"}
               </button>
             </div>

@@ -254,8 +254,10 @@ export default function MomDetailClient({ mom }: { mom: any }) {
         <div>
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Menyusun Dokumen MoM...</h2>
           <p className="text-gray-600 mt-3 font-medium text-lg leading-relaxed">Sistem sedang merangkum transkrip, mengekstrak poin penting, dan menyusun rencana tindakan (Action Plan).</p>
-          <div className="mt-8 bg-yellow-50 text-yellow-800 px-5 py-2.5 rounded-full inline-flex items-center justify-center gap-2 font-semibold shadow-sm border border-yellow-200">
-            <span>⏳</span> Estimasi waktu selesai: 30 - 60 detik
+          <div className="mt-8">
+            <span className="bg-slate-100 text-slate-600 px-4 py-2 rounded-md text-sm font-medium border border-slate-200 shadow-sm inline-block">
+              Estimasi waktu selesai: 30 - 60 detik
+            </span>
           </div>
         </div>
       </div>
@@ -311,18 +313,17 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                   setEditedContent(mom.content_json)
                   setEditedTopic(mom.topic)
                 }} 
-                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-gray-300 transition-colors"
+                className="bg-white border border-slate-300 text-slate-700 px-5 py-2 rounded-md font-medium hover:bg-slate-50 transition-colors shadow-sm"
                 disabled={isSaving}
               >
-                <X size={18} />
                 Batal
               </button>
               <button 
                 onClick={handleSaveEdit} 
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-green-700 transition-colors"
+                className="bg-telkom-navy text-white px-5 py-2 rounded-md font-medium hover:bg-blue-900 transition-colors shadow-sm flex items-center gap-2"
                 disabled={isSaving}
               >
-                {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                {isSaving && <Loader2 size={16} className="animate-spin" />}
                 Simpan Perubahan
               </button>
             </>
@@ -330,17 +331,15 @@ export default function MomDetailClient({ mom }: { mom: any }) {
             <>
               <button 
                 onClick={() => setIsEditing(true)} 
-                className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+                className="bg-white border border-slate-300 text-slate-700 px-5 py-2 rounded-md font-medium hover:bg-slate-50 transition-colors shadow-sm"
               >
-                <Edit2 size={18} />
                 Edit Dokumen
               </button>
               <div className="relative">
                 <button 
                   onClick={() => setIsExportOpen(!isExportOpen)} 
-                  className="bg-telkom-red text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 hover:bg-red-700 transition-colors shadow-sm"
+                  className="bg-telkom-navy text-white px-5 py-2 rounded-md font-medium flex items-center gap-2 hover:bg-blue-900 transition-colors shadow-sm"
                 >
-                  <Download size={18} />
                   Export
                   <ChevronDown size={16} className={`transition-transform duration-200 ${isExportOpen ? 'rotate-180' : ''}`} />
                 </button>
