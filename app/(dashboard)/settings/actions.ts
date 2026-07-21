@@ -13,8 +13,24 @@ export async function updateProfile(fullName: string, avatarUrl: string | null) 
     return { error: 'Not authenticated' }
   }
 
-  // Update public.users table
-  const { error } = await supabase
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!serviceRoleKey) {
+    return { error: 'Server configuration error: Missing Admin Key' }
+  }
+
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceRoleKey,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  )
+
+  // Update public.users table using admin client since public update is revoked
+  const { error } = await supabaseAdmin
     .from('users')
     .update({ 
       full_name: fullName, 

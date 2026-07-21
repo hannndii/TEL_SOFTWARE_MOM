@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { GoogleGenAI } from '@google/genai'
+import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
@@ -209,10 +210,26 @@ Please analyze the attached meeting transcript document(s).
 
     // 6. Decrement Quota (if free tier)
     if (!isPremium) {
-      await supabase
-        .from('users')
-        .update({ daily_quota_left: userProfile.daily_quota_left - 1 })
-        .eq('id', user.id)
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+      if (serviceRoleKey) {
+        const supabaseAdmin = createAdminClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          serviceRoleKey,
+          {
+            auth: {
+              autoRefreshToken: false,
+              persistSession: false
+            }
+          }
+        )
+        
+        await supabaseAdmin
+          .from('users')
+          .update({ daily_quota_left: userProfile.daily_quota_left - 1 })
+          .eq('id', user.id)
+      } else {
+         console.error("SUPABASE_SERVICE_ROLE_KEY not found. Quota not decremented.");
+      }
     }
 
     // 7. Delete Raw Files from Storage
