@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, AlertCircle, Printer, CheckCircle2, UploadCloud, Edit2, Save, X, Plus, Trash2 } from 'lucide-react'
+import { Loader2, AlertCircle, Printer, CheckCircle2, UploadCloud, Edit2, Save, X, Plus, Trash2, ChevronDown, Download, FileText as FileTextIcon } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
 export default function MomDetailClient({ mom }: { mom: any }) {
@@ -20,6 +20,49 @@ export default function MomDetailClient({ mom }: { mom: any }) {
   const [editedTopic, setEditedTopic] = useState(mom.topic || '')
   const [editedFacilitator, setEditedFacilitator] = useState(mom.facilitator || '')
   const [editedContent, setEditedContent] = useState<any>(mom.content_json || {})
+  const [isExportOpen, setIsExportOpen] = useState(false)
+
+  const exportToPDF = async () => {
+    // Dynamic import to avoid SSR window issues
+    const html2pdf = (await import('html2pdf.js')).default;
+    const element = document.getElementById('mom-document');
+    
+    // Add temporary styling to fix layout for PDF
+    const originalBorder = element?.style.border;
+    if(element) element.style.border = 'none';
+
+    const opt = {
+      margin:       10,
+      filename:     `MoM_${mom.topic?.substring(0,20) || 'Document'}.pdf`,
+      image:        { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    await html2pdf().set(opt).from(element).save();
+    
+    if(element) element.style.border = originalBorder || '';
+    setIsExportOpen(false);
+  }
+
+  const exportToWord = () => {
+    const element = document.getElementById('mom-document');
+    if (!element) return;
+    
+    const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export HTML To Doc</title></head><body>";
+    const footer = "</body></html>";
+    const html = header + element.innerHTML + footer;
+    
+    const blob = new Blob(['\ufeff', html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `MoM_${mom.topic?.substring(0,20) || 'Document'}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setIsExportOpen(false);
+  }
 
   useEffect(() => {
     if (mom.status === 'draft') {
@@ -222,13 +265,16 @@ export default function MomDetailClient({ mom }: { mom: any }) {
     return (
       <div className="flex flex-col items-center justify-center py-32 max-w-lg mx-auto text-center space-y-6">
         <div className="relative">
-          <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center animate-pulse">
-            <Loader2 className="text-telkom-red animate-spin" size={40} />
+          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center animate-pulse shadow-inner border border-red-100">
+            <Loader2 className="text-telkom-red animate-spin" size={48} />
           </div>
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">AI is analyzing your meeting...</h2>
-          <p className="text-gray-500 mt-2">Please wait while Gemini processes your transcript and extracts the main discussion, notes, and action plans. This may take a minute.</p>
+          <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Menyusun Dokumen MoM...</h2>
+          <p className="text-gray-600 mt-3 font-medium text-lg leading-relaxed">Sistem sedang merangkum transkrip, mengekstrak poin penting, dan menyusun rencana tindakan (Action Plan).</p>
+          <div className="mt-8 bg-yellow-50 text-yellow-800 px-5 py-2.5 rounded-full inline-flex items-center justify-center gap-2 font-semibold shadow-sm border border-yellow-200">
+            <span>⏳</span> Estimasi waktu selesai: 30 - 60 detik
+          </div>
         </div>
       </div>
     )
@@ -307,20 +353,34 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                 <Edit2 size={18} />
                 Edit Dokumen
               </button>
-              <button 
-                onClick={() => window.print()} 
-                className="bg-telkom-red text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-red-700 transition-colors shadow-sm"
-              >
-                <Printer size={18} />
-                Export to PDF
-              </button>
+              <div className="relative">
+                <button 
+                  onClick={() => setIsExportOpen(!isExportOpen)} 
+                  className="bg-telkom-red text-white px-4 py-2.5 rounded-lg font-medium flex items-center gap-2 hover:bg-red-700 transition-colors shadow-sm"
+                >
+                  <Download size={18} />
+                  Export
+                  <ChevronDown size={16} className={`transition-transform duration-200 ${isExportOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isExportOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    <button onClick={exportToPDF} className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-3 border-b border-slate-100 transition-colors">
+                      <FileTextIcon size={18} className="text-red-500" /> Export as PDF
+                    </button>
+                    <button onClick={exportToWord} className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                      <FileTextIcon size={18} className="text-blue-600" /> Export as Word (.doc)
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
       </div>
 
       {/* A4 DOCUMENT PAGE */}
-      <div className={`bg-white mx-auto shadow-xl print:shadow-none print:m-0 print:p-0 ${isEditing ? 'border-2 border-blue-400 rounded-lg overflow-hidden' : ''}`} style={{ maxWidth: '210mm', minHeight: '297mm' }}>
+      <div id="mom-document" className={`bg-white mx-auto shadow-2xl print:shadow-none print:m-0 print:p-0 ${isEditing ? 'border-2 border-blue-400 rounded-lg overflow-hidden' : 'rounded-sm border border-slate-200'}`} style={{ maxWidth: '210mm', minHeight: '297mm' }}>
         {isEditing && <div className="bg-blue-50 border-b border-blue-200 px-4 py-2 text-blue-700 text-sm font-semibold text-center flex items-center justify-center gap-2">
           <Edit2 size={16} /> Mode Edit Sedang Aktif
         </div>}
@@ -328,39 +388,39 @@ export default function MomDetailClient({ mom }: { mom: any }) {
         <div className="p-10 text-sm text-black font-sans leading-relaxed">
           
           {/* HEADER TABLE */}
-          <table className="w-full border-collapse border border-black mb-8">
+          <table className="w-full border-collapse border border-slate-300 mb-8">
             <tbody>
               <tr>
-                <td rowSpan={4} className="border border-black w-1/4 p-4 text-center align-middle">
+                <td rowSpan={4} className="border border-slate-300 w-1/4 p-4 text-center align-middle">
                   <img src="/telkom-logo.svg" alt="Telkom Indonesia" className="w-24 mx-auto" />
                 </td>
-                <td colSpan={3} className="border border-black p-2 text-center font-bold text-lg uppercase">
+                <td colSpan={3} className="border border-slate-300 p-2 text-center font-bold text-lg uppercase">
                   MINUTE OF MEETING
                 </td>
               </tr>
               <tr>
-                <td className="border border-black p-2 font-medium w-32">Date</td>
-                <td colSpan={2} className="border border-black p-2">{formattedDate}</td>
+                <td className="border border-slate-300 p-2 font-medium w-32">Date</td>
+                <td colSpan={2} className="border border-slate-300 p-2">{formattedDate}</td>
               </tr>
               <tr>
-                <td className="border border-black p-2 font-medium">Time</td>
-                <td colSpan={2} className="border border-black p-2">{actContent?.time || '-'}</td>
+                <td className="border border-slate-300 p-2 font-medium">Time</td>
+                <td colSpan={2} className="border border-slate-300 p-2">{actContent?.time || '-'}</td>
               </tr>
               <tr>
-                <td className="border border-black p-2 font-medium">Venue</td>
-                <td colSpan={2} className="border border-black p-2">{actContent?.location || '-'}</td>
-              </tr>
-              
-              <tr>
-                <td className="border border-black p-2 font-medium">Meeting Called by</td>
-                <td className="border border-black p-2">Telkom SDA</td>
-                <td className="border border-black p-2 font-medium">Note Taker</td>
-                <td className="border border-black p-2">{mom.user?.user_metadata?.full_name || 'System User'}</td>
+                <td className="border border-slate-300 p-2 font-medium">Venue</td>
+                <td colSpan={2} className="border border-slate-300 p-2">{actContent?.location || '-'}</td>
               </tr>
               
               <tr>
-                <td className="border border-black p-2 font-medium">Type of meeting</td>
-                <td colSpan={3} className={`border border-black p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
+                <td className="border border-slate-300 p-2 font-medium">Meeting Called by</td>
+                <td className="border border-slate-300 p-2">Telkom SDA</td>
+                <td className="border border-slate-300 p-2 font-medium">Note Taker</td>
+                <td className="border border-slate-300 p-2">{mom.user?.user_metadata?.full_name || 'System User'}</td>
+              </tr>
+              
+              <tr>
+                <td className="border border-slate-300 p-2 font-medium">Type of meeting</td>
+                <td colSpan={3} className={`border border-slate-300 p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
                   <div className="flex gap-6 flex-wrap">
                     {types.map(type => (
                       <label key={type} className={`flex items-center gap-1 ${isEditing ? 'cursor-pointer' : ''}`}>
@@ -383,8 +443,8 @@ export default function MomDetailClient({ mom }: { mom: any }) {
               </tr>
 
               <tr>
-                <td className="border border-black p-2 font-medium">Facilitator</td>
-                <td colSpan={3} className={`border border-black p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
+                <td className="border border-slate-300 p-2 font-medium">Facilitator</td>
+                <td colSpan={3} className={`border border-slate-300 p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
                   {isEditing ? (
                     <input 
                       value={editedFacilitator} 
@@ -396,13 +456,13 @@ export default function MomDetailClient({ mom }: { mom: any }) {
               </tr>
               
               <tr>
-                <td className="border border-black p-2 font-medium">Attendees</td>
-                <td colSpan={3} className="border border-black p-2">{mom.participants?.join(', ') || '-'}</td>
+                <td className="border border-slate-300 p-2 font-medium">Attendees</td>
+                <td colSpan={3} className="border border-slate-300 p-2">{mom.participants?.join(', ') || '-'}</td>
               </tr>
 
               <tr>
-                <td className="border border-black p-2 font-medium">AGENDA</td>
-                <td colSpan={3} className={`border border-black p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
+                <td className="border border-slate-300 p-2 font-medium">AGENDA</td>
+                <td colSpan={3} className={`border border-slate-300 p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
                   {isEditing ? (
                     <input 
                       value={editedTopic} 
@@ -513,19 +573,19 @@ export default function MomDetailClient({ mom }: { mom: any }) {
             {/* C. Action Plan */}
             <div>
               <h3 className="font-bold mb-2">C. Action Plan</h3>
-              <table className="w-full border-collapse border border-black text-sm">
+              <table className="w-full border-collapse border border-slate-300 text-sm">
                 <thead>
                   <tr>
-                    <th className="border border-black p-2 text-left w-1/3">PIC</th>
-                    <th className="border border-black p-2 text-left">Action</th>
-                    {isEditing && <th className="border border-black p-2 w-10 text-center"></th>}
+                    <th className="border border-slate-300 p-2 text-left w-1/3">PIC</th>
+                    <th className="border border-slate-300 p-2 text-left">Action</th>
+                    {isEditing && <th className="border border-slate-300 p-2 w-10 text-center"></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {actContent?.action_plan?.length > 0 ? (
                     actContent.action_plan.map((action: any, i: number) => (
                       <tr key={i} className={isEditing ? 'bg-yellow-50' : ''}>
-                        <td className="border border-black p-2">
+                        <td className="border border-slate-300 p-2">
                           {isEditing ? (
                             <textarea 
                               value={action.pic} 
@@ -534,7 +594,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                             />
                           ) : action.pic}
                         </td>
-                        <td className="border border-black p-2">
+                        <td className="border border-slate-300 p-2">
                           {isEditing ? (
                             <textarea 
                               value={action.action} 
@@ -544,7 +604,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                           ) : action.action}
                         </td>
                         {isEditing && (
-                          <td className="border border-black p-2 text-center align-middle">
+                          <td className="border border-slate-300 p-2 text-center align-middle">
                             <button onClick={() => removeActionPlan(i)} className="text-red-500"><Trash2 size={16}/></button>
                           </td>
                         )}
@@ -552,14 +612,14 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                     ))
                   ) : (
                     <tr>
-                      <td className="border border-black p-2">-</td>
-                      <td className="border border-black p-2">-</td>
-                      {isEditing && <td className="border border-black p-2"></td>}
+                      <td className="border border-slate-300 p-2">-</td>
+                      <td className="border border-slate-300 p-2">-</td>
+                      {isEditing && <td className="border border-slate-300 p-2"></td>}
                     </tr>
                   )}
                   {isEditing && (
                     <tr>
-                      <td colSpan={3} className="border border-black p-2 text-center">
+                      <td colSpan={3} className="border border-slate-300 p-2 text-center">
                         <button onClick={addActionPlan} className="text-blue-600 text-xs font-bold flex items-center justify-center gap-1 w-full">
                           <Plus size={14} /> Tambah Action Plan
                         </button>
