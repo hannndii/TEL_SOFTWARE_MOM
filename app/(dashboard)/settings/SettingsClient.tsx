@@ -221,21 +221,23 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                           )}
                         </div>
                         {isEditingName ? (
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-col gap-2">
                             <input 
                               type="text" 
                               value={fullName}
                               onChange={(e) => setFullName(e.target.value)}
-                              className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-telkom-red"
+                              className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-telkom-red"
                               placeholder="Enter your full name"
                               autoFocus
                             />
-                            <button onClick={handleSaveName} disabled={isSavingProfile} className="px-4 py-2.5 bg-telkom-red text-white hover:bg-red-600 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
-                              {isSavingProfile ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save
-                            </button>
-                            <button onClick={() => {setIsEditingName(false); setFullName(userProfile?.full_name || '')}} className="p-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
-                              <X size={16} />
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button onClick={handleSaveName} disabled={isSavingProfile} className="px-3 py-1.5 bg-telkom-red text-white hover:bg-red-600 rounded-md transition-colors flex items-center gap-1.5 text-xs font-medium">
+                                {isSavingProfile ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Save
+                              </button>
+                              <button onClick={() => {setIsEditingName(false); setFullName(userProfile?.full_name || '')}} className="px-3 py-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-md transition-colors flex items-center gap-1.5 text-xs font-medium">
+                                <X size={14} /> Cancel
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm">
