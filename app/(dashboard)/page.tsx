@@ -4,11 +4,12 @@ import DashboardTableControls from './DashboardTableControls'
 import { createClient } from "@/utils/supabase/server";
 import DeleteMomButton from "./DeleteMomButton";
 
-export default async function Dashboard(props: { searchParams?: Promise<{ search?: string, status?: string }> }) {
+export default async function Dashboard(props: { searchParams?: Promise<{ search?: string, status?: string, showAll?: string }> }) {
   const supabase = await createClient();
   const searchParams = await props.searchParams;
   const search = searchParams?.search || '';
   const statusFilter = searchParams?.status || 'All';
+  const showAll = searchParams?.showAll === 'true';
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return null;
@@ -42,9 +43,11 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
     momsQuery = momsQuery.eq('status', statusFilter);
   }
 
+  const limitCount = showAll ? 100 : 3;
+
   const { data: recentMoms } = await momsQuery
     .order('updated_at', { ascending: false })
-    .limit(10);
+    .limit(limitCount);
 
   const isPremium = userProfile?.tier === 'premium';
 
@@ -171,11 +174,27 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                   ))}
                 </tbody>
               </table>
-              <div className="p-4 border-t border-gray-100 text-center">
-                <Link href="#" className="inline-flex items-center text-blue-600 text-sm font-semibold hover:text-blue-800 transition-colors">
-                  View all minute of meeting <ArrowRight size={16} className="ml-1" />
-                </Link>
-              </div>
+              
+              {!showAll && totalMom > 3 && (
+                <div className="p-4 border-t border-gray-100 text-center bg-gray-50/30">
+                  <Link 
+                    href={`?${new URLSearchParams({ ...((searchParams as Record<string, string>) || {}), showAll: 'true' }).toString()}`} 
+                    className="inline-flex items-center text-blue-600 text-sm font-semibold hover:text-blue-800 transition-colors"
+                  >
+                    View all <ArrowRight size={16} className="ml-1" />
+                  </Link>
+                </div>
+              )}
+              {showAll && totalMom > 3 && (
+                <div className="p-4 border-t border-gray-100 text-center bg-gray-50/30">
+                  <Link 
+                    href={`?${new URLSearchParams({ ...((searchParams as Record<string, string>) || {}), showAll: 'false' }).toString()}`} 
+                    className="inline-flex items-center text-gray-500 text-sm font-semibold hover:text-gray-700 transition-colors"
+                  >
+                    Show less
+                  </Link>
+                </div>
+              )}
             </div>
           ) : (
             <div className="p-8 text-center py-20 flex flex-col items-center">
