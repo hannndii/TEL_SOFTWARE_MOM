@@ -2,7 +2,7 @@ import { z } from "zod";
 
 // Step 1: Metadata
 export const metadataSchema = z.object({
-  agenda: z.string().min(3, "Agenda must be at least 3 characters").max(100),
+  agenda: z.string().min(3, "Agenda must be at least 3 characters").max(500, "Agenda is too long"),
   meeting_date: z.string().min(1, "Meeting date is required"),
   time: z.string().min(1, "Time is required"),
   location: z.string().min(2, "Location or Venue is required"),
