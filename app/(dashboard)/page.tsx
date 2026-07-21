@@ -127,11 +127,11 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                     <th className="px-6 py-4 font-bold">Meeting Topic</th>
                     <th className="px-6 py-4 font-bold w-32 lg:w-40">Date</th>
                     <th className="px-6 py-4 font-bold w-32 text-center">Status</th>
-                    <th className="px-6 py-4 font-bold w-32 text-right">Action</th>
+                    <th className="px-6 py-4 font-bold w-32 text-center">Action</th>
                     <th className="px-4 py-4 font-bold w-16"></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
+                <tbody className="divide-y divide-gray-200 bg-white">
                   {recentMoms.map((mom) => (
                     <tr key={mom.id} className="hover:bg-slate-50 transition-colors group">
                       <td className="px-6 py-5">
@@ -155,10 +155,10 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                           {mom.status}
                         </span>
                       </td>
-                      <td className="px-6 py-5 text-right">
+                      <td className="px-6 py-5 text-center">
                         <Link 
                           href={`/mom/${mom.id}`} 
-                          className="inline-flex items-center justify-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-1.5 rounded-md w-28"
+                          className="inline-flex items-center justify-center bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium transition-colors px-4 py-1.5 rounded-md w-28 shadow-sm"
                         >
                           {mom.status === 'draft' ? 'Generate' : 'View'}
                           <ChevronRight size={16} className="ml-1" />
