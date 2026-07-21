@@ -55,29 +55,32 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
   const isPremium = userProfile?.tier === 'premium';
 
   return (
-    <div className="w-full bg-gray-50 min-h-screen p-4 md:p-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-sm text-gray-500 mt-1">Manage and generate your meeting minutes.</p>
-        </div>
-        <div className="flex items-center gap-4">
-          <button className="p-2 text-gray-500 hover:bg-gray-200 rounded-full transition-colors" title="Notifications">
-            <Bell size={20} />
-          </button>
-          <Link 
-            href="/new-mom" 
-            className="bg-[#e4000f] hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm"
-          >
-            <Plus size={18} />
-            Create New MoM
-          </Link>
+    <div className="w-full bg-gray-50 min-h-screen">
+      {/* Dark Header Container */}
+      <div className="relative bg-gradient-to-r from-telkom-navy to-[#1e2840] pt-12 pb-24 px-4 md:px-8 rounded-b-3xl shadow-inner overflow-hidden">
+        <div className="relative z-10 max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard Overview</h1>
+            <p className="text-sm text-gray-300 mt-1 font-medium">Manage and generate your meeting minutes.</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-full transition-colors" title="Notifications">
+              <Bell size={20} />
+            </button>
+            <Link 
+              href="/new-mom" 
+              className="bg-[#e4000f] hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 transition-colors shadow-sm"
+            >
+              <Plus size={18} />
+              Create New MoM
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Main Layout Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto -mt-12 relative z-20 px-4 md:px-8 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Column (Table) */}
         <div className="lg:col-span-2">
