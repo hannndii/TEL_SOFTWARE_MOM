@@ -10,10 +10,8 @@ export async function middleware(request: NextRequest) {
     return await updateSession(request)
   } catch (e: any) {
     console.error("Middleware crash:", e);
-    return new Response(JSON.stringify({ error: "Middleware Error", details: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    })
+    // Return next() instead of 500 to prevent Vercel from showing the generic MIDDLEWARE_INVOCATION_FAILED page
+    return NextResponse.next();
   }
 }
 
