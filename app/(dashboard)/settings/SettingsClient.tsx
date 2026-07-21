@@ -74,10 +74,15 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
 
   return (
     <div className="w-full">
-      {/* CLEAN HEADER */}
-      <div className="max-w-4xl mx-auto pt-6 pb-10">
-        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Account Settings</h1>
-        <p className="text-slate-500 mt-2 text-sm">Manage your profile, preferences, and billing.</p>
+      {/* PREMIUM HEADER */}
+      <div className="relative bg-gradient-to-r from-telkom-navy to-[#1e2840] pt-12 pb-16 px-8 -mx-8 -mt-8 rounded-b-3xl shadow-inner overflow-hidden mb-8">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        <div className="absolute bottom-0 left-10 w-40 h-40 bg-telkom-red opacity-10 rounded-full blur-2xl translate-y-1/2"></div>
+        
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold text-white tracking-tight">Account Settings</h1>
+          <p className="text-gray-300 mt-2 text-sm font-medium">Manage your profile, preferences, and billing.</p>
+        </div>
       </div>
 
       <div className="max-w-4xl mx-auto">

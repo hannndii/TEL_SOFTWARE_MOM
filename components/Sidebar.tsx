@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from "next/link";
 import { LayoutDashboard, FileText, Settings, LogOut } from "lucide-react";
 import { logout } from "@/app/login/actions";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 interface SidebarProps {
   userEmail?: string;
@@ -13,6 +13,9 @@ interface SidebarProps {
 
 export default function Sidebar({ userEmail = "Guest", userTier = "free" }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentTab = searchParams?.get('tab') || 'profile';
+  
   const initial = userEmail.charAt(0).toUpperCase();
   const displayTier = userTier === 'premium' ? 'Premium Tier' : 'Free Tier';
 
@@ -87,19 +90,19 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
             <div className="flex flex-col ml-12 pl-2 space-y-3 py-3 border-l-2 border-slate-800">
               <Link 
                 href="/settings?tab=profile" 
-                className={`text-sm transition-all flex items-center ${pathname === '/settings' && (!typeof window !== 'undefined' || !window.location.search || window.location.search === '?tab=profile') ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
+                className={`text-sm transition-all flex items-center ${pathname === '/settings' && currentTab === 'profile' ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
               >
                 Profile
               </Link>
               <Link 
                 href="/settings?tab=security" 
-                className={`text-sm transition-all flex items-center ${typeof window !== 'undefined' && window.location.search === '?tab=security' ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
+                className={`text-sm transition-all flex items-center ${pathname === '/settings' && currentTab === 'security' ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
               >
                 Security
               </Link>
               <Link 
                 href="/settings?tab=billing" 
-                className={`text-sm transition-all flex items-center ${typeof window !== 'undefined' && window.location.search === '?tab=billing' ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
+                className={`text-sm transition-all flex items-center ${pathname === '/settings' && currentTab === 'billing' ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
               >
                 Billing
               </Link>
