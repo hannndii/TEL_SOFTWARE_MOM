@@ -3,6 +3,9 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { supabaseAdmin } from '@/utils/supabase/admin'
+import { cookies } from 'next/headers'
+import crypto from 'crypto'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -12,10 +15,63 @@ export async function login(formData: FormData) {
     password: formData.get('password') as string,
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  // 1. Verifikasi Email via Admin Client (Supabase hides this by default for security)
+  const { data: userExists, error: emailError } = await supabaseAdmin
+    .from('users')
+    .select('id')
+    .eq('email', data.email)
+    .single()
+
+  if (!userExists || emailError) {
+    redirect('/login?error=' + encodeURIComponent('Alamat email belum terdaftar.'))
+  }
+
+  // 2. Sign In
+  const { data: authData, error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
     redirect('/login?error=' + encodeURIComponent(error.message))
+  }
+
+  // 3. Logic Pembatasan 2 Device
+  if (authData?.user) {
+    const cookieStore = await cookies()
+    let deviceId = cookieStore.get('device_id')?.value
+
+    if (!deviceId) {
+      deviceId = crypto.randomUUID()
+      cookieStore.set('device_id', deviceId, { 
+        path: '/',
+        maxAge: 60 * 60 * 24 * 365 * 10 // 10 years
+      })
+    }
+
+    // Upsert device ke tabel user_devices
+    await supabaseAdmin
+      .from('user_devices')
+      .upsert({ 
+        user_id: authData.user.id, 
+        device_id: deviceId, 
+        last_active: new Date().toISOString() 
+      }, { onConflict: 'user_id, device_id' })
+
+    // Hitung jumlah device aktif untuk user ini
+    const { data: activeDevices } = await supabaseAdmin
+      .from('user_devices')
+      .select('id, device_id')
+      .eq('user_id', authData.user.id)
+      .order('last_active', { ascending: true })
+
+    // Jika lebih dari 2 device, hapus yang paling lama (paling awal di array karena ascending)
+    if (activeDevices && activeDevices.length > 2) {
+      const devicesToDelete = activeDevices.slice(0, activeDevices.length - 2)
+      for (const device of devicesToDelete) {
+        await supabaseAdmin
+          .from('user_devices')
+          .delete()
+          .eq('id', device.id)
+      }
+    }
   }
 
   revalidatePath('/', 'layout')
@@ -62,6 +118,20 @@ export async function signup(formData: FormData) {
 
 export async function logout() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (user) {
+    const cookieStore = await cookies()
+    const deviceId = cookieStore.get('device_id')?.value
+    if (deviceId) {
+      await supabaseAdmin
+        .from('user_devices')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('device_id', deviceId)
+    }
+  }
+
   await supabase.auth.signOut()
   redirect('/login')
 }

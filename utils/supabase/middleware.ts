@@ -39,6 +39,46 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  if (user) {
+    // DEVICE LIMIT CHECK: Ensure the device is still active in the database
+    const deviceId = request.cookies.get('device_id')?.value
+    let isValidDevice = false
+
+    if (deviceId) {
+      // Create admin client for bypassing RLS to check device
+      const adminSupabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          cookies: {
+            getAll() { return [] },
+            setAll() {},
+          },
+        }
+      )
+      
+      const { data: device } = await adminSupabase
+        .from('user_devices')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('device_id', deviceId)
+        .single()
+        
+      if (device) isValidDevice = true
+    }
+
+    if (!isValidDevice) {
+      // Kick the user out
+      await supabase.auth.signOut()
+      
+      // Redirect to login with error
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('error', 'Sesi Anda telah berakhir karena Anda masuk di terlalu banyak perangkat.')
+      return NextResponse.redirect(url)
+    }
+  }
+
   if (
     !user &&
     !request.nextUrl.pathname.startsWith('/login') &&
