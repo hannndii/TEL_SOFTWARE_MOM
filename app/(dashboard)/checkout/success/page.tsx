@@ -48,7 +48,7 @@ export default async function CheckoutSuccessPage({
   
   // DEMO MODE BYPASS: Midtrans Sandbox seringkali telat menyimpan transaksi atau mengembalikan 404 
   // setelah simulator selesai. Untuk keperluan demo portofolio, kita anggap sukses jika order_id valid.
-  if (midtransStatus?.status_code === '404' && order_id.startsWith('TELMOM-PREM-')) {
+  if (midtransStatus?.status_code === '404' && typeof order_id === 'string' && order_id.startsWith('TELMOM-PREM-')) {
     status = 'settlement (demo simulated)';
     isSuccess = true;
   }
