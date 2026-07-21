@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react";
-import { MoreVertical, Loader2, AlertTriangle } from "lucide-react";
+import { Trash2, Loader2, AlertTriangle } from "lucide-react";
 import { deleteMom } from "./actions";
 
 export default function DeleteMomButton({ momId }: { momId: string }) {
@@ -24,10 +24,10 @@ export default function DeleteMomButton({ momId }: { momId: string }) {
       <button 
         onClick={() => setShowModal(true)}
         disabled={isDeleting}
-        className="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors disabled:opacity-50"
+        className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors disabled:opacity-50"
         title="Delete MoM"
       >
-        <MoreVertical size={20} />
+        <Trash2 size={16} />
       </button>
 
       {showModal && (
