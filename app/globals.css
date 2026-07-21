@@ -42,20 +42,28 @@
     margin: 1cm;
   }
   
-  body {
+  html, body {
     background-color: white !important;
     margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  
+  /* Reset ALL layout shifts, heights, and overflows to allow infinite scrolling for print */
+  * {
+    overflow: visible !important;
+  }
+
+  main, .dashboard-wrapper, div[class*="h-screen"], div[class*="overflow-hidden"], div[class*="overflow-y-auto"] {
+    height: auto !important;
+    overflow: visible !important;
+    margin-left: 0 !important;
     padding: 0 !important;
   }
   
   /* Hide sidebar and any global layout elements we don't want */
   aside, nav, header {
     display: none !important;
-  }
-  
-  /* Reset layout shifts from dashboard wrapper */
-  main, .dashboard-wrapper {
-    margin-left: 0 !important;
-    padding: 0 !important;
   }
 }

@@ -23,25 +23,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
   const [isExportOpen, setIsExportOpen] = useState(false)
 
   const exportToPDF = async () => {
-    // Dynamic import to avoid SSR window issues
-    const html2pdf = (await import('html2pdf.js')).default;
-    const element = document.getElementById('mom-document');
-    
-    // Add temporary styling to fix layout for PDF
-    const originalBorder = element?.style.border;
-    if(element) element.style.border = 'none';
-
-    const opt = {
-      margin:       10,
-      filename:     `MoM_${mom.topic?.substring(0,20) || 'Document'}.pdf`,
-      image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
-    };
-    
-    await html2pdf().set(opt).from(element).save();
-    
-    if(element) element.style.border = originalBorder || '';
+    window.print();
     setIsExportOpen(false);
   }
 
@@ -368,7 +350,10 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                     <button onClick={exportToPDF} className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-3 border-b border-slate-100 transition-colors">
                       <FileTextIcon size={18} className="text-red-500" /> Export as PDF
                     </button>
-                    <button onClick={exportToWord} className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors">
+                    <button onClick={() => {
+                      alert("CATATAN: Microsoft Word tidak mendukung struktur layout web modern (seperti flexbox). Hasil file Word mungkin tidak 100% sama dengan preview. Untuk hasil 100% sama persis, silakan gunakan Export as PDF.");
+                      exportToWord();
+                    }} className="w-full text-left px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-3 transition-colors">
                       <FileTextIcon size={18} className="text-blue-600" /> Export as Word (.doc)
                     </button>
                   </div>
@@ -695,9 +680,18 @@ export default function MomDetailClient({ mom }: { mom: any }) {
 
             {/* EVIDENCE PHOTO */}
             {evidenceUrl ? (
-              <div className="mt-10 break-before-page">
+              <div className="mt-10 break-before-page flex flex-col items-center">
                 <p className="text-xs italic mb-4">*foto yang diinput sebagai evidance</p>
-                <img src={evidenceUrl} alt="Evidence" className="max-w-full h-auto max-h-[150mm] object-contain border border-gray-200" />
+                <img src={evidenceUrl} alt="Evidence" className="max-w-full h-auto max-h-[150mm] object-contain border border-slate-200 shadow-sm" />
+                {isEditing && (
+                  <div className="mt-4 print:hidden">
+                    <input type="file" id="evidenceUploadEdit" className="hidden" accept="image/jpeg,image/png,image/jpg" onChange={handleEvidenceUpload} />
+                    <label htmlFor="evidenceUploadEdit" className="cursor-pointer bg-slate-100 text-slate-700 px-4 py-2 rounded-lg font-semibold hover:bg-slate-200 transition-colors flex items-center gap-2 border border-slate-300">
+                      {isUploadingEvidence ? <Loader2 size={16} className="animate-spin" /> : <Edit2 size={16} />}
+                      {isUploadingEvidence ? 'Mengganti...' : 'Ganti Foto'}
+                    </label>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="mt-10 pt-10 border-t border-dashed border-gray-300 print:hidden flex flex-col items-center">
