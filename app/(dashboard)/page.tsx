@@ -59,40 +59,38 @@ export default async function Dashboard() {
         
         {/* 2. STATS CARDS (Overlapping Header) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-0">
-          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200 flex items-center gap-5 transition-transform hover:-translate-y-1">
-            <div className="p-4 bg-blue-50 text-blue-600 rounded-xl">
-              <FileText size={28} />
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center gap-2 mb-4">
+              <FileText size={20} className="text-gray-500" />
+              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Total Minutes</h3>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Total Minutes</p>
-              <p className="text-3xl font-extrabold text-gray-900 mt-1">{totalMom || 0}</p>
-            </div>
+            <p className="text-3xl font-bold text-gray-900">{totalMom || 0}</p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200 flex items-center gap-5 transition-transform hover:-translate-y-1">
-            <div className="p-4 bg-orange-50 text-orange-500 rounded-xl">
-              <Clock size={28} />
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock size={20} className="text-gray-500" />
+              <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Recent Drafts</h3>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Recent Drafts</p>
-              <p className="text-3xl font-extrabold text-gray-900 mt-1">{totalDrafts || 0}</p>
-            </div>
+            <p className="text-3xl font-bold text-gray-900">{totalDrafts || 0}</p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200 flex items-center gap-5 transition-transform hover:-translate-y-1">
-            <div className="p-4 bg-green-50 text-green-500 rounded-xl">
-              <BarChart3 size={28} />
-            </div>
-            <div>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Daily Quota</p>
-              <div className="flex items-baseline gap-2 mt-1">
-                {isPremium ? (
-                   <p className="text-3xl font-extrabold text-gray-900">Unlimited</p>
-                ) : (
-                   <p className="text-3xl font-extrabold text-gray-900">{userProfile?.daily_quota_left || 0} <span className="text-lg text-gray-400 font-medium">/ 3</span></p>
-                )}
+          <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <BarChart3 size={20} className="text-gray-500" />
+                <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">Daily Quota</h3>
               </div>
-              <p className="text-xs text-green-600 font-semibold mt-1">{isPremium ? 'Premium Tier' : 'Free Tier Active'}</p>
+              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${isPremium ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
+                {isPremium ? 'Premium' : 'Free'}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              {isPremium ? (
+                 <p className="text-3xl font-bold text-gray-900">Unlimited</p>
+              ) : (
+                 <p className="text-3xl font-bold text-gray-900">{userProfile?.daily_quota_left || 0} <span className="text-lg text-gray-400 font-medium">/ 3</span></p>
+              )}
             </div>
           </div>
         </div>
