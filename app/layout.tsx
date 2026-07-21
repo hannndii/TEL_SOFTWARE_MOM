@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "myTELMOM | AI Meeting Minutes",
+  title: "myTELMOM",
   description: "AI-Powered Meeting Minutes Generator",
 };
 
