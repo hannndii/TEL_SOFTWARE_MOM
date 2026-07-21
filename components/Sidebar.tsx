@@ -30,10 +30,10 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
         </Link>
         <Link
           href="/new-mom"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-telkom-red/10 text-white hover:bg-telkom-red/20 border border-telkom-red/20 hover:border-telkom-red/50 transition-all group"
+          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-telkom-red text-white hover:bg-red-600 transition-all group shadow-md"
         >
-          <FileText size={20} className="text-red-400 group-hover:text-red-300 transition-colors" />
-          <span className="font-semibold">Generate AI MoM</span>
+          <FileText size={20} className="text-white group-hover:scale-110 transition-transform" />
+          <span className="font-bold tracking-wide">Generate AI MoM</span>
         </Link>
         <Link
           href="/settings"
