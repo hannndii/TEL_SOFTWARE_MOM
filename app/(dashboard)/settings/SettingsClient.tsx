@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { User, Shield, CreditCard, Loader2, CheckCircle2, AlertTriangle, Key } from 'lucide-react'
+import { User, Shield, CreditCard, Loader2, CheckCircle2, AlertTriangle, Key, Copy, Check } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { updatePassword, deleteAccount } from './actions'
 import PasswordInput from '@/components/PasswordInput'
@@ -13,7 +13,8 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
   const activeTab = (searchParams.get('tab') as Tab) || 'profile'
   const [isUpgrading, setIsUpgrading] = useState(false)
   const [success, setSuccess] = useState(false)
-  
+  const [copied, setCopied] = useState(false)
+
   // Security Tab States
   const [isPending, startTransition] = useTransition()
   const [securityMessage, setSecurityMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
@@ -73,15 +74,10 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
 
   return (
     <div className="w-full">
-      {/* PREMIUM HEADER */}
-      <div className="relative bg-gradient-to-r from-telkom-navy to-[#1e2840] pt-12 pb-16 px-8 -mx-8 -mt-8 rounded-b-3xl shadow-inner overflow-hidden mb-8">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="absolute bottom-0 left-10 w-40 h-40 bg-telkom-red opacity-10 rounded-full blur-2xl translate-y-1/2"></div>
-        
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold text-white tracking-tight">Account Settings</h1>
-          <p className="text-gray-300 mt-2 text-sm font-medium">Manage your profile, preferences, and billing.</p>
-        </div>
+      {/* CLEAN HEADER */}
+      <div className="max-w-4xl mx-auto pt-6 pb-10">
+        <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Account Settings</h1>
+        <p className="text-slate-500 mt-2 text-sm">Manage your profile, preferences, and billing.</p>
       </div>
 
       <div className="max-w-4xl mx-auto">
@@ -95,38 +91,55 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                 <div className="flex flex-col items-center space-y-8">
                   
                   {/* Avatar Section */}
-                  <div className="flex flex-col items-center space-y-4">
-                    <div className="w-28 h-28 rounded-full bg-gradient-to-br from-telkom-red to-orange-500 flex items-center justify-center text-white text-4xl font-bold shadow-xl ring-4 ring-red-50">
+                  <div className="flex flex-col items-center space-y-5">
+                    <div className="w-28 h-28 rounded-full bg-slate-800 flex items-center justify-center text-white text-4xl font-bold shadow-sm ring-4 ring-slate-50">
                       {userEmail.charAt(0).toUpperCase()}
                     </div>
-                    <div className="text-center">
-                      <h3 className="text-xl font-bold text-gray-900">{userEmail.split('@')[0]}</h3>
-                      <span className={`inline-block mt-2 px-4 py-1.5 text-xs font-bold rounded-full border ${isPremium ? 'bg-green-50 text-green-700 border-green-200' : 'bg-gray-50 text-gray-700 border-gray-200'}`}>
-                        {isPremium ? '⭐ Premium Member' : 'Free Member'}
+                    <div className="text-center space-y-2">
+                      <h3 className="text-xl font-bold text-slate-900">{userEmail.split('@')[0]}</h3>
+                      <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full border ${isPremium ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-slate-50 text-slate-700 border-slate-200'}`}>
+                        {isPremium ? 'Premium Member' : 'Free Member'}
                       </span>
                     </div>
                   </div>
 
                   {/* Info Section */}
-                  <div className="w-full max-w-2xl space-y-6">
-                    <div className="border-b border-gray-100 pb-4 text-center">
-                      <h2 className="text-2xl font-bold text-gray-900">Personal Information</h2>
-                      <p className="text-sm text-gray-500 mt-1">Your basic account details.</p>
+                  <div className="w-full max-w-2xl space-y-8 mt-4">
+                    <div className="border-b border-slate-100 pb-4 text-center">
+                      <h2 className="text-2xl font-bold text-slate-900">Personal Information</h2>
+                      <p className="text-sm text-slate-500 mt-1">Your basic account details.</p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm transition-transform hover:-translate-y-1">
-                        <label className="flex items-center gap-2 text-sm font-bold text-gray-600 mb-2">
-                          <User size={18} className="text-telkom-red" /> Email Address
+                    <div className="space-y-6 max-w-xl mx-auto">
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-2">
+                          <User size={16} className="text-slate-400" /> Email Address
                         </label>
-                        <p className="text-gray-900 font-medium truncate text-lg" title={userEmail}>{userEmail}</p>
+                        <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900">
+                          {userEmail}
+                        </div>
                       </div>
                       
-                      <div className="bg-gray-50 p-5 rounded-xl border border-gray-100 shadow-sm transition-transform hover:-translate-y-1">
-                        <label className="flex items-center gap-2 text-sm font-bold text-gray-600 mb-2">
-                          <Shield size={18} className="text-telkom-navy" /> Account ID
+                      <div>
+                        <label className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-2">
+                          <Shield size={16} className="text-slate-400" /> Account ID
                         </label>
-                        <p className="text-gray-500 text-sm font-mono truncate bg-gray-200/50 px-2 py-1 rounded" title={userProfile?.id}>{userProfile?.id}</p>
+                        <div className="relative">
+                          <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-600 font-mono text-sm pr-12 truncate">
+                            {userProfile?.id}
+                          </div>
+                          <button 
+                            onClick={() => {
+                              navigator.clipboard.writeText(userProfile?.id || '');
+                              setCopied(true);
+                              setTimeout(() => setCopied(false), 2000);
+                            }}
+                            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                            title="Copy ID"
+                          >
+                            {copied ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

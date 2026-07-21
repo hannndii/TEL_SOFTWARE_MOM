@@ -44,14 +44,15 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
   };
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(isActive('/settings'));
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   return (
-    <aside className="w-64 bg-telkom-navy text-white h-full flex flex-col shadow-lg shrink-0 overflow-y-auto">
-      <div className="p-6 border-b border-white/10 shrink-0">
+    <aside className="w-64 bg-slate-900 text-white h-full flex flex-col shadow-xl border-r border-slate-800 shrink-0 overflow-y-auto relative">
+      <div className="p-6 border-b border-slate-800 shrink-0">
         <h1 className="text-2xl font-bold tracking-tight">
           TEL<span className="text-telkom-red">MOM</span>
         </h1>
-        <p className="text-xs text-white/60 mt-1">AI-Powered Meeting Minutes</p>
+        <p className="text-xs text-slate-400 mt-1">AI-Powered Meeting Minutes</p>
       </div>
 
       <nav className="flex-1 py-6 px-4 space-y-2">
@@ -68,37 +69,37 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
         <div>
           <button 
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className="w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-white/10 transition-colors group text-gray-300 hover:text-white"
+            className="w-full flex items-center justify-between px-4 py-3 rounded-lg hover:bg-white/5 transition-colors group text-slate-300 hover:text-white"
           >
             <div className="flex items-center gap-3">
-              <Settings size={20} className={isActive('/settings') ? 'text-telkom-red' : 'text-gray-400 group-hover:text-white transition-colors'} />
+              <Settings size={20} className={isActive('/settings') ? 'text-telkom-red' : 'text-slate-400 group-hover:text-white transition-colors'} />
               <span className={isActive('/settings') ? 'font-bold text-white' : 'font-medium'}>Settings</span>
             </div>
             <svg 
-              className={`w-4 h-4 transition-transform duration-200 ${isSettingsOpen ? 'rotate-180' : ''}`} 
+              className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isSettingsOpen ? 'rotate-180' : ''}`} 
               fill="none" viewBox="0 0 24 24" stroke="currentColor"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
           
-          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isSettingsOpen ? 'max-h-40 mt-1 opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="flex flex-col pl-11 pr-4 space-y-1 py-1">
+          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isSettingsOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}>
+            <div className="flex flex-col ml-12 pl-2 space-y-3 py-3 border-l-2 border-slate-800">
               <Link 
                 href="/settings?tab=profile" 
-                className={`text-sm py-2 px-3 rounded-md transition-colors ${pathname === '/settings' && (!typeof window !== 'undefined' || !window.location.search || window.location.search === '?tab=profile') ? 'bg-white/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                className={`text-sm transition-all flex items-center ${pathname === '/settings' && (!typeof window !== 'undefined' || !window.location.search || window.location.search === '?tab=profile') ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
               >
                 Profile
               </Link>
               <Link 
                 href="/settings?tab=security" 
-                className={`text-sm py-2 px-3 rounded-md transition-colors ${typeof window !== 'undefined' && window.location.search === '?tab=security' ? 'bg-white/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                className={`text-sm transition-all flex items-center ${typeof window !== 'undefined' && window.location.search === '?tab=security' ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
               >
                 Security
               </Link>
               <Link 
                 href="/settings?tab=billing" 
-                className={`text-sm py-2 px-3 rounded-md transition-colors ${typeof window !== 'undefined' && window.location.search === '?tab=billing' ? 'bg-white/10 text-white font-semibold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                className={`text-sm transition-all flex items-center ${typeof window !== 'undefined' && window.location.search === '?tab=billing' ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
               >
                 Billing
               </Link>
@@ -107,23 +108,36 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
         </div>
       </nav>
 
-      <div className="p-4 border-t border-white/10 space-y-4">
-        <div className="flex items-center gap-3 px-2">
-          <div className="w-10 h-10 rounded-full bg-telkom-red flex items-center justify-center font-bold">
+      {/* User Footer Profile & Dropdown */}
+      <div className="relative p-4 border-t border-slate-800 shrink-0">
+        
+        {/* Dropdown Menu */}
+        {isProfileDropdownOpen && (
+          <div className="absolute bottom-full left-4 right-4 mb-2 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-2 animate-in fade-in slide-in-from-bottom-2">
+            <form action={logout}>
+              <button type="submit" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700 text-red-400 hover:text-red-300 transition-colors">
+                <LogOut size={18} />
+                <span className="text-sm font-medium">Log out securely</span>
+              </button>
+            </form>
+          </div>
+        )}
+
+        <button 
+          onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+          className="w-full flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-800 transition-colors text-left"
+        >
+          <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center font-bold shadow-inner shrink-0 text-sm">
             {initial}
           </div>
-          <div className="overflow-hidden">
-            <p className="text-sm font-medium truncate" title={userEmail}>{userEmail}</p>
-            <p className="text-xs text-white/60">{displayTier}</p>
+          <div className="overflow-hidden flex-1">
+            <p className="text-sm font-semibold truncate text-white" title={userEmail}>{userEmail.split('@')[0]}</p>
+            <p className="text-xs text-slate-400">{displayTier}</p>
           </div>
-        </div>
-        
-        <form action={logout}>
-          <button type="submit" className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 text-red-300 hover:text-red-200 transition-colors">
-            <LogOut size={20} />
-            <span className="font-medium">Log out</span>
-          </button>
-        </form>
+          <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+          </svg>
+        </button>
       </div>
     </aside>
   );
