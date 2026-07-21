@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { GoogleGenAI } from '@google/genai'
-import mammoth from 'mammoth'
+
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 
@@ -78,6 +78,7 @@ export async function POST(request: Request) {
       if (fileName.endsWith('.docx') || fileBlob.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         // Extract text using mammoth
         try {
+          const mammoth = (await import('mammoth')).default
           const result = await mammoth.extractRawText({ buffer })
           const text = result.value
           
