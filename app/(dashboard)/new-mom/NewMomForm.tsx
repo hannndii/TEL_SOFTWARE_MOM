@@ -84,22 +84,26 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Stepper UI */}
-      <div className="mb-8 px-16">
-        <div className="flex items-center justify-between relative">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0"></div>
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-telkom-red rounded-full z-0 transition-all duration-300" style={{ width: `${((step - 1) / 1) * 100}%` }}></div>
+      <div className="mb-12 px-16 max-w-xl mx-auto">
+        <div className="relative">
+          {/* Background Track */}
+          <div className="absolute left-0 top-5 -translate-y-1/2 w-full h-1.5 bg-slate-200 rounded-full z-0"></div>
+          {/* Active Track */}
+          <div className="absolute left-0 top-5 -translate-y-1/2 h-1.5 bg-telkom-red rounded-full z-0 transition-all duration-300" style={{ width: `${((step - 1) / 1) * 100}%` }}></div>
           
-          {[
-            { num: 1, label: 'Metadata' },
-            { num: 2, label: 'Transcript' }
-          ].map((s) => (
-            <div key={s.num} className="relative z-10 flex flex-col items-center bg-gray-50 px-2">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${step >= s.num ? 'bg-telkom-red text-white shadow-md' : 'bg-gray-200 text-gray-500'}`}>
-                {step > s.num ? <CheckCircle2 size={20} /> : s.num}
+          <div className="flex items-center justify-between relative z-10">
+            {[
+              { num: 1, label: 'Metadata' },
+              { num: 2, label: 'Transcript' }
+            ].map((s) => (
+              <div key={s.num} className="relative flex flex-col items-center">
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ring-4 ring-white ${step >= s.num ? 'bg-telkom-red text-white shadow-lg' : 'bg-slate-300 text-slate-600'}`}>
+                  {step > s.num ? <CheckCircle2 size={20} /> : s.num}
+                </div>
+                <span className={`absolute top-12 mt-1 text-sm font-semibold tracking-wide whitespace-nowrap ${step >= s.num ? 'text-slate-900' : 'text-slate-400'}`}>{s.label}</span>
               </div>
-              <span className={`mt-2 text-xs font-medium ${step >= s.num ? 'text-gray-900' : 'text-gray-500'}`}>{s.label}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 
