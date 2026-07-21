@@ -175,7 +175,7 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                 </tbody>
               </table>
               
-              {!showAll && totalMom > 3 && (
+              {(!showAll && (totalMom || 0) > 3) && (
                 <div className="p-4 border-t border-gray-100 text-center bg-gray-50/30">
                   <Link 
                     href={`?${new URLSearchParams({ ...((searchParams as Record<string, string>) || {}), showAll: 'true' }).toString()}`} 
@@ -185,7 +185,7 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                   </Link>
                 </div>
               )}
-              {showAll && totalMom > 3 && (
+              {(showAll && (totalMom || 0) > 3) && (
                 <div className="p-4 border-t border-gray-100 text-center bg-gray-50/30">
                   <Link 
                     href={`?${new URLSearchParams({ ...((searchParams as Record<string, string>) || {}), showAll: 'false' }).toString()}`} 
