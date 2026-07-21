@@ -1,8 +1,5 @@
 import { z } from "zod";
 
-const MAX_FILE_SIZE = 3 * 1024 * 1024; // 3MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
-
 // Step 1: Metadata
 export const metadataSchema = z.object({
   agenda: z.string().min(3, "Agenda must be at least 3 characters").max(100),
@@ -11,38 +8,42 @@ export const metadataSchema = z.object({
   location: z.string().min(2, "Location or Venue is required"),
   type_of_meeting: z.array(z.string()).min(1, "Please select at least one meeting type"),
   attendees: z.string().min(2, "Attendees are required"),
+  facilitator: z.string().min(2, "Facilitator name is required"),
 });
 
 export type MetadataFormValues = z.infer<typeof metadataSchema>;
 
-// Step 2: Audio/Transcript
-// This schema will just validate that a file exists.
-// We handle the tier-based format restrictions manually in the UI dropzone or via custom logic
+// Step 2: Content (Transcript)
 export const contentSchema = z.object({
-  contentFile: z
-    .any()
-    .refine((file) => file !== undefined && file !== null, "Audio or Transcript file is required."),
-});
-
-export type ContentFormValues = {
-  contentFile: File | null;
-};
-
-// Step 3: Evidence Photo
-export const evidenceSchema = z.object({
-  evidenceFile: z
-    .any()
-    .refine((file) => file !== undefined && file !== null, "Evidence photo is required.")
+  contentFiles: z.any()
+    .refine((files) => files && files.length >= 1, "Please upload at least one transcript file")
+    .refine((files) => files && files.length <= 5, "You can upload a maximum of 5 files")
     .refine(
-      (file) => (file?.size || 0) <= MAX_FILE_SIZE,
-      "Max image size is 3MB."
+      (files) => {
+        if (!files) return false;
+        for (let i = 0; i < files.length; i++) {
+          if (files[i].size > 20 * 1024 * 1024) return false;
+        }
+        return true;
+      },
+      "Each file size must be less than 20MB"
     )
     .refine(
-      (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),
-      "Only .jpg, .jpeg, and .png formats are supported."
+      (files) => {
+        if (!files) return false;
+        for (let i = 0; i < files.length; i++) {
+          const type = files[i].type || '';
+          const name = files[i].name.toLowerCase();
+          
+          const isText = type.includes('text') || type.includes('word') || type.includes('pdf') || name.endsWith('.txt') || name.endsWith('.docx');
+          const isAudio = type.includes('audio') || name.endsWith('.mp3') || name.endsWith('.wav') || name.endsWith('.m4a');
+          
+          if (!isText && !isAudio) {
+             return false;
+          }
+        }
+        return true;
+      },
+      "Only .txt, .docx, and audio files (.mp3, .wav, .m4a) are supported"
     ),
 });
-
-export type EvidenceFormValues = {
-  evidenceFile: File | null;
-};

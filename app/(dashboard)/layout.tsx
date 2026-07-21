@@ -2,6 +2,8 @@ import Sidebar from "@/components/Sidebar";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -22,12 +24,10 @@ export default async function DashboardLayout({
     .single();
 
   return (
-    <div className="flex flex-1 min-h-screen">
+    <div className="flex h-screen w-full overflow-hidden bg-gray-50/50">
       <Sidebar userEmail={user.email} userTier={userProfile?.tier || 'free'} />
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <div className="flex-1 overflow-y-auto bg-gray-50/50 p-8">
-          {children}
-        </div>
+      <main className="flex-1 h-full min-w-0 overflow-y-auto p-8 relative">
+        {children}
       </main>
     </div>
   );

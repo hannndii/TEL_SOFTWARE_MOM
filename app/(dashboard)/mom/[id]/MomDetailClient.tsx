@@ -2,12 +2,24 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, AlertCircle, Printer, CheckCircle2 } from 'lucide-react'
+import { Loader2, AlertCircle, Printer, CheckCircle2, UploadCloud, Edit2, Save, X, Plus, Trash2 } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
 
 export default function MomDetailClient({ mom }: { mom: any }) {
   const router = useRouter()
   const [isProcessing, setIsProcessing] = useState(mom.status === 'draft')
   const [error, setError] = useState<string | null>(null)
+  
+  // Evidence State
+  const [isUploadingEvidence, setIsUploadingEvidence] = useState(false)
+  const [evidenceUrl, setEvidenceUrl] = useState(mom.photo_evidence_url)
+
+  // Edit Mode State
+  const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [editedTopic, setEditedTopic] = useState(mom.topic || '')
+  const [editedFacilitator, setEditedFacilitator] = useState(mom.facilitator || '')
+  const [editedContent, setEditedContent] = useState<any>(mom.content_json || {})
 
   useEffect(() => {
     if (mom.status === 'draft') {
@@ -34,8 +46,177 @@ export default function MomDetailClient({ mom }: { mom: any }) {
       }
 
       processMom()
+    } else {
+      // Sync state if mom data changes from parent
+      setEditedTopic(mom.topic || '')
+      setEditedFacilitator(mom.facilitator || '')
+      setEditedContent(mom.content_json || {})
+      setEvidenceUrl(mom.photo_evidence_url)
     }
-  }, [mom.id, mom.status, router])
+  }, [mom, router])
+
+  const handleEvidenceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    setIsUploadingEvidence(true)
+    try {
+      const supabase = createClient()
+      const evidenceExt = file.name.split('.').pop()
+      const evidenceFileName = `${mom.user_id}/${Date.now()}_evidence.${evidenceExt}`
+      
+      const { error: uploadError } = await supabase.storage
+        .from('mom_evidences')
+        .upload(evidenceFileName, file)
+
+      if (uploadError) throw new Error("Failed to upload image")
+
+      const { data: publicUrlData } = supabase.storage
+        .from('mom_evidences')
+        .getPublicUrl(evidenceFileName)
+
+      const newUrl = publicUrlData.publicUrl
+
+      const { error: dbError } = await supabase
+        .from('meeting_mom')
+        .update({ photo_evidence_url: newUrl })
+        .eq('id', mom.id)
+
+      if (dbError) throw new Error("Failed to update database")
+
+      setEvidenceUrl(newUrl)
+    } catch (err: any) {
+      alert(err.message || "An error occurred uploading evidence")
+    } finally {
+      setIsUploadingEvidence(false)
+    }
+  }
+
+  const handleSaveEdit = async () => {
+    setIsSaving(true)
+    try {
+      const supabase = createClient()
+      const { error: dbError } = await supabase
+        .from('meeting_mom')
+        .update({ 
+          topic: editedTopic,
+          facilitator: editedFacilitator,
+          content_json: editedContent,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', mom.id)
+
+      if (dbError) throw new Error("Failed to save changes")
+      
+      setIsEditing(false)
+      router.refresh()
+    } catch (err: any) {
+      alert(err.message || "An error occurred while saving edits")
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // --- Handlers for deep state updates in Edit Mode ---
+  const handleArrayChange = (key: string, index: number, value: string) => {
+    const newArray = [...(editedContent[key] || [])]
+    newArray[index] = value
+    setEditedContent({ ...editedContent, [key]: newArray })
+  }
+  
+  const addArrayItem = (key: string) => {
+    const newArray = [...(editedContent[key] || []), '']
+    setEditedContent({ ...editedContent, [key]: newArray })
+  }
+
+  const removeArrayItem = (key: string, index: number) => {
+    const newArray = [...(editedContent[key] || [])]
+    newArray.splice(index, 1)
+    setEditedContent({ ...editedContent, [key]: newArray })
+  }
+
+  // Meeting Type
+  const handleTypeChange = (type: string, isChecked: boolean) => {
+    const currentTypes = Array.isArray(editedContent?.type_of_meeting) ? editedContent.type_of_meeting : [];
+    let newTypes;
+    if (isChecked) {
+      newTypes = [...currentTypes, type];
+    } else {
+      newTypes = currentTypes.filter((t: string) => t !== type);
+    }
+    setEditedContent({ ...editedContent, type_of_meeting: newTypes });
+  }
+
+  // Action Plan
+  const handleActionPlanChange = (index: number, field: 'pic' | 'action', value: string) => {
+    const newPlan = [...(editedContent.action_plan || [])]
+    if (!newPlan[index]) newPlan[index] = { pic: '', action: '' }
+    newPlan[index][field] = value
+    setEditedContent({ ...editedContent, action_plan: newPlan })
+  }
+
+  const addActionPlan = () => {
+    const newPlan = [...(editedContent.action_plan || []), { pic: '', action: '' }]
+    setEditedContent({ ...editedContent, action_plan: newPlan })
+  }
+  
+  const removeActionPlan = (index: number) => {
+    const newPlan = [...(editedContent.action_plan || [])]
+    newPlan.splice(index, 1)
+    setEditedContent({ ...editedContent, action_plan: newPlan })
+  }
+
+  // Notes
+  const handleNoteChange = (index: number, field: 'nama_pihak' | 'informasi', value: string, infoIndex?: number) => {
+    const newNotes = [...(editedContent.notes || [])]
+    if (!newNotes[index]) newNotes[index] = { nama_pihak: '', informasi: [] }
+    
+    if (field === 'nama_pihak') {
+      newNotes[index].nama_pihak = value
+    } else if (field === 'informasi' && typeof infoIndex === 'number') {
+      const newInfos = [...(newNotes[index].informasi || [])]
+      newInfos[infoIndex] = value
+      newNotes[index].informasi = newInfos
+    }
+    setEditedContent({ ...editedContent, notes: newNotes })
+  }
+  
+  const addNoteInfo = (noteIndex: number) => {
+    const newNotes = [...(editedContent.notes || [])]
+    if (!newNotes[noteIndex].informasi) newNotes[noteIndex].informasi = []
+    newNotes[noteIndex].informasi.push('')
+    setEditedContent({ ...editedContent, notes: newNotes })
+  }
+  
+  const removeNoteInfo = (noteIndex: number, infoIndex: number) => {
+    const newNotes = [...(editedContent.notes || [])]
+    newNotes[noteIndex].informasi.splice(infoIndex, 1)
+    setEditedContent({ ...editedContent, notes: newNotes })
+  }
+  
+  const addNotePerson = () => {
+    const newNotes = [...(editedContent.notes || []), { nama_pihak: '', informasi: [''] }]
+    setEditedContent({ ...editedContent, notes: newNotes })
+  }
+  
+  const removeNotePerson = (noteIndex: number) => {
+    const newNotes = [...(editedContent.notes || [])]
+    newNotes.splice(noteIndex, 1)
+    setEditedContent({ ...editedContent, notes: newNotes })
+  }
+
+  // Informasi Tambahan
+  const handleInfoChange = (field: string, value: string) => {
+    setEditedContent({
+      ...editedContent,
+      informasi_tambahan: {
+        ...(editedContent.informasi_tambahan || {}),
+        [field]: value
+      }
+    })
+  }
+
+  // --------------------------------------------------
 
   if (isProcessing) {
     return (
@@ -70,8 +251,6 @@ export default function MomDetailClient({ mom }: { mom: any }) {
       </div>
     )
   }
-
-  const { content_json } = mom
   
   // Format date correctly
   const meetingDateObj = new Date(mom.meeting_date)
@@ -79,9 +258,12 @@ export default function MomDetailClient({ mom }: { mom: any }) {
   
   // Parse checkboxes
   const types = ["Review", "Briefing", "Coordination", "Decision Making", "Other"]
-  const selectedTypes = Array.isArray(content_json?.type_of_meeting) 
-    ? content_json.type_of_meeting 
-    : [content_json?.type_of_meeting].filter(Boolean)
+  const selectedTypes = Array.isArray(editedContent?.type_of_meeting) 
+    ? editedContent.type_of_meeting 
+    : [editedContent?.type_of_meeting].filter(Boolean)
+
+  const actContent = isEditing ? editedContent : mom.content_json;
+  const actTopic = isEditing ? editedTopic : mom.topic;
 
   return (
     <div className="max-w-5xl mx-auto mb-20">
@@ -92,17 +274,57 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           <h1 className="text-2xl font-bold text-gray-900">Meeting Minutes</h1>
           <p className="text-sm text-gray-500">Document is ready to be exported.</p>
         </div>
-        <button 
-          onClick={() => window.print()} 
-          className="bg-telkom-red text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-red-700 transition-colors shadow-sm"
-        >
-          <Printer size={18} />
-          Export to PDF
-        </button>
+        <div className="flex items-center gap-3">
+          {isEditing ? (
+            <>
+              <button 
+                onClick={() => {
+                  setIsEditing(false)
+                  setEditedContent(mom.content_json)
+                  setEditedTopic(mom.topic)
+                }} 
+                className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-gray-300 transition-colors"
+                disabled={isSaving}
+              >
+                <X size={18} />
+                Batal
+              </button>
+              <button 
+                onClick={handleSaveEdit} 
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-green-700 transition-colors"
+                disabled={isSaving}
+              >
+                {isSaving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                Simpan Perubahan
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={() => setIsEditing(true)} 
+                className="bg-white border border-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                <Edit2 size={18} />
+                Edit Dokumen
+              </button>
+              <button 
+                onClick={() => window.print()} 
+                className="bg-telkom-red text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-red-700 transition-colors shadow-sm"
+              >
+                <Printer size={18} />
+                Export to PDF
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* A4 DOCUMENT PAGE */}
-      <div className="bg-white mx-auto shadow-xl print:shadow-none print:m-0 print:p-0" style={{ maxWidth: '210mm', minHeight: '297mm' }}>
+      <div className={`bg-white mx-auto shadow-xl print:shadow-none print:m-0 print:p-0 ${isEditing ? 'border-2 border-blue-400 rounded-lg overflow-hidden' : ''}`} style={{ maxWidth: '210mm', minHeight: '297mm' }}>
+        {isEditing && <div className="bg-blue-50 border-b border-blue-200 px-4 py-2 text-blue-700 text-sm font-semibold text-center flex items-center justify-center gap-2">
+          <Edit2 size={16} /> Mode Edit Sedang Aktif
+        </div>}
+        
         <div className="p-10 text-sm text-black font-sans leading-relaxed">
           
           {/* HEADER TABLE */}
@@ -110,7 +332,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
             <tbody>
               <tr>
                 <td rowSpan={4} className="border border-black w-1/4 p-4 text-center align-middle">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Telkom_Indonesia_2013.svg/1200px-Telkom_Indonesia_2013.svg.png" alt="Telkom Indonesia" className="w-24 mx-auto" />
+                  <img src="/telkom-logo.svg" alt="Telkom Indonesia" className="w-24 mx-auto" />
                 </td>
                 <td colSpan={3} className="border border-black p-2 text-center font-bold text-lg uppercase">
                   MINUTE OF MEETING
@@ -122,11 +344,11 @@ export default function MomDetailClient({ mom }: { mom: any }) {
               </tr>
               <tr>
                 <td className="border border-black p-2 font-medium">Time</td>
-                <td colSpan={2} className="border border-black p-2">{content_json?.time || '-'}</td>
+                <td colSpan={2} className="border border-black p-2">{actContent?.time || '-'}</td>
               </tr>
               <tr>
                 <td className="border border-black p-2 font-medium">Venue</td>
-                <td colSpan={2} className="border border-black p-2">{content_json?.location || '-'}</td>
+                <td colSpan={2} className="border border-black p-2">{actContent?.location || '-'}</td>
               </tr>
               
               <tr>
@@ -138,11 +360,21 @@ export default function MomDetailClient({ mom }: { mom: any }) {
               
               <tr>
                 <td className="border border-black p-2 font-medium">Type of meeting</td>
-                <td colSpan={3} className="border border-black p-2">
+                <td colSpan={3} className={`border border-black p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
                   <div className="flex gap-6 flex-wrap">
                     {types.map(type => (
-                      <label key={type} className="flex items-center gap-1 cursor-pointer">
-                        <input type="checkbox" checked={selectedTypes.includes(type)} readOnly className="w-3 h-3 text-black border-gray-400 rounded-none focus:ring-0" />
+                      <label key={type} className={`flex items-center gap-1 ${isEditing ? 'cursor-pointer' : ''}`}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedTypes.includes(type)} 
+                          readOnly={!isEditing} 
+                          onChange={(e) => {
+                            if (isEditing) {
+                              handleTypeChange(type, e.target.checked)
+                            }
+                          }}
+                          className="w-3 h-3 text-black border-gray-400 rounded-none focus:ring-0" 
+                        />
                         {type}
                       </label>
                     ))}
@@ -152,7 +384,15 @@ export default function MomDetailClient({ mom }: { mom: any }) {
 
               <tr>
                 <td className="border border-black p-2 font-medium">Facilitator</td>
-                <td colSpan={3} className="border border-black p-2">{mom.facilitator || '-'}</td>
+                <td colSpan={3} className={`border border-black p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
+                  {isEditing ? (
+                    <input 
+                      value={editedFacilitator} 
+                      onChange={(e) => setEditedFacilitator(e.target.value)}
+                      className="w-full bg-transparent border-b border-gray-400 focus:border-telkom-red outline-none"
+                    />
+                  ) : mom.facilitator || '-'}
+                </td>
               </tr>
               
               <tr>
@@ -162,7 +402,15 @@ export default function MomDetailClient({ mom }: { mom: any }) {
 
               <tr>
                 <td className="border border-black p-2 font-medium">AGENDA</td>
-                <td colSpan={3} className="border border-black p-2">{mom.topic || '-'}</td>
+                <td colSpan={3} className={`border border-black p-2 ${isEditing ? 'bg-yellow-50' : ''}`}>
+                  {isEditing ? (
+                    <input 
+                      value={editedTopic} 
+                      onChange={(e) => setEditedTopic(e.target.value)}
+                      className="w-full bg-transparent border-b border-gray-400 focus:border-telkom-red outline-none"
+                    />
+                  ) : actTopic || '-'}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -173,35 +421,93 @@ export default function MomDetailClient({ mom }: { mom: any }) {
             {/* A. Dasar Pembahasan */}
             <div>
               <h3 className="font-bold mb-2">A. Dasar Pembahasan</h3>
-              <ul className="list-disc pl-8 space-y-1">
-                {content_json?.dasar_pembahasan?.length > 0 ? (
-                  content_json.dasar_pembahasan.map((item: string, i: number) => <li key={i}>{item}</li>)
-                ) : (
-                  <li>-</li>
-                )}
-              </ul>
+              {isEditing ? (
+                <div className="pl-4 space-y-2">
+                  {actContent?.dasar_pembahasan?.map((item: string, i: number) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className="mt-1 font-bold">-</span>
+                      <textarea 
+                        value={item} 
+                        onChange={(e) => handleArrayChange('dasar_pembahasan', i, e.target.value)}
+                        className="w-full bg-yellow-50 border-b border-gray-300 focus:border-telkom-red outline-none min-h-[40px] resize-y p-1"
+                      />
+                      <button onClick={() => removeArrayItem('dasar_pembahasan', i)} className="text-red-500 mt-1"><Trash2 size={16} /></button>
+                    </div>
+                  ))}
+                  <button onClick={() => addArrayItem('dasar_pembahasan')} className="text-blue-600 text-xs font-bold flex items-center gap-1 mt-2">
+                    <Plus size={14} /> Tambah Dasar Pembahasan
+                  </button>
+                </div>
+              ) : (
+                <ul className="list-disc pl-8 space-y-1">
+                  {actContent?.dasar_pembahasan?.length > 0 ? (
+                    actContent.dasar_pembahasan.map((item: string, i: number) => <li key={i}>{item}</li>)
+                  ) : (
+                    <li>-</li>
+                  )}
+                </ul>
+              )}
             </div>
 
             {/* B. Note */}
             <div>
               <h3 className="font-bold mb-2">B. Note</h3>
-              <p className="font-medium mb-2 pl-4">Topik: {mom.topic}</p>
-              <div className="pl-4 space-y-4">
-                {content_json?.notes?.length > 0 ? (
-                  content_json.notes.map((note: any, i: number) => (
-                    <div key={i}>
-                      <p className="font-medium">{i + 1}. {note.nama_pihak}:</p>
-                      <ul className="list-[circle] pl-8 space-y-1 mt-1">
+              <p className="font-medium mb-2 pl-4">Topik: {actTopic}</p>
+              
+              {isEditing ? (
+                <div className="pl-4 space-y-6">
+                  {actContent?.notes?.map((note: any, i: number) => (
+                    <div key={i} className="bg-yellow-50/50 p-2 border border-gray-200 rounded">
+                      <div className="flex gap-2 items-center mb-2">
+                        <span className="font-medium">{i + 1}.</span>
+                        <input 
+                          value={note.nama_pihak} 
+                          onChange={(e) => handleNoteChange(i, 'nama_pihak', e.target.value)}
+                          placeholder="Nama Pihak"
+                          className="font-bold bg-white border border-gray-300 focus:border-telkom-red outline-none p-1 flex-1"
+                        />
+                        <button onClick={() => removeNotePerson(i)} className="text-red-500"><Trash2 size={16} /></button>
+                      </div>
+                      <div className="pl-6 space-y-2">
                         {note.informasi?.map((info: string, idx: number) => (
-                          <li key={idx}>{info}</li>
+                          <div key={idx} className="flex gap-2 items-start">
+                            <span className="mt-1 text-[10px]">⚫</span>
+                            <textarea 
+                              value={info} 
+                              onChange={(e) => handleNoteChange(i, 'informasi', e.target.value, idx)}
+                              className="w-full bg-white border border-gray-300 focus:border-telkom-red outline-none p-1 min-h-[40px] resize-y"
+                            />
+                            <button onClick={() => removeNoteInfo(i, idx)} className="text-red-500 mt-1"><X size={16} /></button>
+                          </div>
                         ))}
-                      </ul>
+                        <button onClick={() => addNoteInfo(i)} className="text-blue-600 text-xs font-bold flex items-center gap-1 mt-1">
+                          <Plus size={14} /> Tambah Poin Informasi
+                        </button>
+                      </div>
                     </div>
-                  ))
-                ) : (
-                  <p className="pl-4">-</p>
-                )}
-              </div>
+                  ))}
+                  <button onClick={addNotePerson} className="text-blue-600 text-sm font-bold flex items-center gap-1">
+                    <Plus size={16} /> Tambah Pembicara (Note)
+                  </button>
+                </div>
+              ) : (
+                <div className="pl-4 space-y-4">
+                  {actContent?.notes?.length > 0 ? (
+                    actContent.notes.map((note: any, i: number) => (
+                      <div key={i}>
+                        <p className="font-medium">{i + 1}. {note.nama_pihak}:</p>
+                        <ul className="list-[circle] pl-8 space-y-1 mt-1">
+                          {note.informasi?.map((info: string, idx: number) => (
+                            <li key={idx}>{info}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="pl-4">-</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* C. Action Plan */}
@@ -212,20 +518,52 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                   <tr>
                     <th className="border border-black p-2 text-left w-1/3">PIC</th>
                     <th className="border border-black p-2 text-left">Action</th>
+                    {isEditing && <th className="border border-black p-2 w-10 text-center"></th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {content_json?.action_plan?.length > 0 ? (
-                    content_json.action_plan.map((action: any, i: number) => (
-                      <tr key={i}>
-                        <td className="border border-black p-2">{action.pic}</td>
-                        <td className="border border-black p-2">{action.action}</td>
+                  {actContent?.action_plan?.length > 0 ? (
+                    actContent.action_plan.map((action: any, i: number) => (
+                      <tr key={i} className={isEditing ? 'bg-yellow-50' : ''}>
+                        <td className="border border-black p-2">
+                          {isEditing ? (
+                            <textarea 
+                              value={action.pic} 
+                              onChange={(e) => handleActionPlanChange(i, 'pic', e.target.value)}
+                              className="w-full bg-transparent outline-none min-h-[40px] resize-none"
+                            />
+                          ) : action.pic}
+                        </td>
+                        <td className="border border-black p-2">
+                          {isEditing ? (
+                            <textarea 
+                              value={action.action} 
+                              onChange={(e) => handleActionPlanChange(i, 'action', e.target.value)}
+                              className="w-full bg-transparent outline-none min-h-[40px] resize-none"
+                            />
+                          ) : action.action}
+                        </td>
+                        {isEditing && (
+                          <td className="border border-black p-2 text-center align-middle">
+                            <button onClick={() => removeActionPlan(i)} className="text-red-500"><Trash2 size={16}/></button>
+                          </td>
+                        )}
                       </tr>
                     ))
                   ) : (
                     <tr>
                       <td className="border border-black p-2">-</td>
                       <td className="border border-black p-2">-</td>
+                      {isEditing && <td className="border border-black p-2"></td>}
+                    </tr>
+                  )}
+                  {isEditing && (
+                    <tr>
+                      <td colSpan={3} className="border border-black p-2 text-center">
+                        <button onClick={addActionPlan} className="text-blue-600 text-xs font-bold flex items-center justify-center gap-1 w-full">
+                          <Plus size={14} /> Tambah Action Plan
+                        </button>
+                      </td>
                     </tr>
                   )}
                 </tbody>
@@ -235,15 +573,52 @@ export default function MomDetailClient({ mom }: { mom: any }) {
             {/* D. Information Tambahan */}
             <div>
               <h3 className="font-bold mb-2">D. Information Tambahan</h3>
-              <ul className="list-disc pl-8 space-y-2">
-                <li><strong>Keputusan Final:</strong> {content_json?.informasi_tambahan?.keputusan_final || '-'}</li>
-                <li><strong>Kendala yang Disampaikan:</strong> {content_json?.informasi_tambahan?.kendala || '-'}</li>
-                <li><strong>Risiko yang Disebutkan:</strong> {content_json?.informasi_tambahan?.risiko || '-'}</li>
-                <li><strong>Hal yang Masih Menunggu Keputusan:</strong> {content_json?.informasi_tambahan?.menunggu_keputusan || '-'}</li>
-              </ul>
+              {isEditing ? (
+                <div className="pl-4 space-y-3 bg-yellow-50 p-4 border border-gray-200 rounded">
+                  <div>
+                    <label className="font-bold text-xs text-gray-500 uppercase">Keputusan Final:</label>
+                    <textarea 
+                      value={actContent?.informasi_tambahan?.keputusan_final || ''} 
+                      onChange={(e) => handleInfoChange('keputusan_final', e.target.value)}
+                      className="w-full border border-gray-300 focus:border-telkom-red outline-none p-2 mt-1 rounded min-h-[60px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-xs text-gray-500 uppercase">Kendala yang Disampaikan:</label>
+                    <textarea 
+                      value={actContent?.informasi_tambahan?.kendala || ''} 
+                      onChange={(e) => handleInfoChange('kendala', e.target.value)}
+                      className="w-full border border-gray-300 focus:border-telkom-red outline-none p-2 mt-1 rounded min-h-[60px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-xs text-gray-500 uppercase">Risiko yang Disebutkan:</label>
+                    <textarea 
+                      value={actContent?.informasi_tambahan?.risiko || ''} 
+                      onChange={(e) => handleInfoChange('risiko', e.target.value)}
+                      className="w-full border border-gray-300 focus:border-telkom-red outline-none p-2 mt-1 rounded min-h-[60px]"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-bold text-xs text-gray-500 uppercase">Hal yang Masih Menunggu Keputusan:</label>
+                    <textarea 
+                      value={actContent?.informasi_tambahan?.menunggu_keputusan || ''} 
+                      onChange={(e) => handleInfoChange('menunggu_keputusan', e.target.value)}
+                      className="w-full border border-gray-300 focus:border-telkom-red outline-none p-2 mt-1 rounded min-h-[60px]"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <ul className="list-disc pl-8 space-y-2">
+                  <li><strong>Keputusan Final:</strong> {actContent?.informasi_tambahan?.keputusan_final || '-'}</li>
+                  <li><strong>Kendala yang Disampaikan:</strong> {actContent?.informasi_tambahan?.kendala || '-'}</li>
+                  <li><strong>Risiko yang Disebutkan:</strong> {actContent?.informasi_tambahan?.risiko || '-'}</li>
+                  <li><strong>Hal yang Masih Menunggu Keputusan:</strong> {actContent?.informasi_tambahan?.menunggu_keputusan || '-'}</li>
+                </ul>
+              )}
             </div>
 
-            {/* SIGNATURE SECTION (Page Break for PDF if needed, but we let it flow naturally) */}
+            {/* SIGNATURE SECTION */}
             <div className="pt-20 pb-10">
               <div className="flex justify-center text-center">
                 <div>
@@ -251,7 +626,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                   <p className="font-bold">Mengetahui</p>
                   
                   <div className="mt-24">
-                    <p className="font-bold">Via {content_json?.location?.includes('Zoom') ? 'Zoom Meeting' : content_json?.location}</p>
+                    <p className="font-bold">Via {actContent?.location?.includes('Zoom') ? 'Zoom Meeting' : actContent?.location}</p>
                     <p className="font-bold">(Foto kehadiran)</p>
                   </div>
                 </div>
@@ -259,10 +634,28 @@ export default function MomDetailClient({ mom }: { mom: any }) {
             </div>
 
             {/* EVIDENCE PHOTO */}
-            {mom.photo_evidence_url && (
+            {evidenceUrl ? (
               <div className="mt-10 break-before-page">
                 <p className="text-xs italic mb-4">*foto yang diinput sebagai evidance</p>
-                <img src={mom.photo_evidence_url} alt="Evidence" className="max-w-full h-auto max-h-[150mm] object-contain border border-gray-200" />
+                <img src={evidenceUrl} alt="Evidence" className="max-w-full h-auto max-h-[150mm] object-contain border border-gray-200" />
+              </div>
+            ) : (
+              <div className="mt-10 pt-10 border-t border-dashed border-gray-300 print:hidden flex flex-col items-center">
+                <p className="text-sm text-gray-500 mb-4 text-center">Belum ada Foto Bukti Kehadiran. Anda dapat mengunggahnya sekarang sebelum mengekspor ke PDF.</p>
+                <input 
+                  type="file" 
+                  id="evidenceUpload" 
+                  className="hidden" 
+                  accept="image/jpeg,image/png,image/jpg"
+                  onChange={handleEvidenceUpload}
+                />
+                <label 
+                  htmlFor="evidenceUpload" 
+                  className="cursor-pointer bg-telkom-navy text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-900 transition-colors flex items-center gap-2"
+                >
+                  {isUploadingEvidence ? <Loader2 size={18} className="animate-spin" /> : <UploadCloud size={18} />}
+                  {isUploadingEvidence ? 'Mengunggah...' : 'Upload Foto Kehadiran'}
+                </label>
               </div>
             )}
 

@@ -1,5 +1,6 @@
 import { signup } from '@/app/login/actions'
 import Link from 'next/link'
+import PasswordInput from '@/components/PasswordInput'
 
 export default async function SignupPage({
   searchParams,
@@ -16,7 +17,7 @@ export default async function SignupPage({
             Create an Account
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Join Telkom <span className="text-telkom-red font-bold">MoM</span> today
+            Welcome to <span className="text-telkom-red font-bold">TELMOM</span> and Join Now!
           </p>
         </div>
         
@@ -40,18 +41,13 @@ export default async function SignupPage({
                 placeholder="Email address" 
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input 
-                id="password" 
-                name="password" 
-                type="password" 
-                autoComplete="new-password" 
-                required 
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all sm:text-sm" 
-                placeholder="Password (minimum 6 characters)" 
-              />
-            </div>
+            <PasswordInput 
+              id="password" 
+              name="password" 
+              placeholder="Password (minimum 6 characters)" 
+              autoComplete="new-password" 
+              required 
+            />
           </div>
 
           <button 

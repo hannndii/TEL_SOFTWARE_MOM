@@ -20,73 +20,53 @@ export async function submitMomDraft(formData: FormData) {
     try {
       type_of_meeting = JSON.parse(formData.get('type_of_meeting') as string)
     } catch(e) {
-      // fallback if not a json array
       type_of_meeting = [formData.get('type_of_meeting') as string]
     }
     const location = formData.get('location') as string
     const attendees = formData.get('attendees') as string
+    const facilitator = formData.get('facilitator') as string
 
-    // Extract Files
-    const contentFile = formData.get('contentFile') as File
-    const evidenceFile = formData.get('evidenceFile') as File
+    // Extract Files (multiple)
+    const contentFiles = formData.getAll('contentFiles') as File[]
 
-    if (!agenda || !meeting_date || !time || !type_of_meeting || !location || !attendees || !contentFile || !evidenceFile) {
+    if (!agenda || !meeting_date || !time || !type_of_meeting || !location || !attendees || !facilitator || !contentFiles || contentFiles.length === 0) {
       return { success: false, error: 'Missing required fields or files' }
     }
 
-    // 1. Upload Evidence Photo to 'mom_evidences'
-    const evidenceExt = evidenceFile.name.split('.').pop()
-    const evidenceFileName = `${user.id}/${Date.now()}_evidence.${evidenceExt}`
-    
-    const { error: evidenceUploadError } = await supabase.storage
-      .from('mom_evidences')
-      .upload(evidenceFileName, evidenceFile, {
-        upsert: false
-      })
+    const rawFilePaths: string[] = []
 
-    if (evidenceUploadError) {
-      console.error('Evidence upload error:', evidenceUploadError)
-      return { success: false, error: 'Failed to upload evidence photo. Ensure mom_evidences bucket exists and accepts 3MB files.' }
+    // Upload Content Files to 'mom_contents'
+    for (let i = 0; i < contentFiles.length; i++) {
+      const file = contentFiles[i]
+      const ext = file.name.split('.').pop()
+      const fileName = `${user.id}/${Date.now()}_${i}_content.${ext}`
+      
+      const { error: uploadError } = await supabase.storage
+        .from('mom_contents')
+        .upload(fileName, file, { upsert: false })
+
+      if (uploadError) {
+        console.error('Content upload error:', uploadError)
+        return { success: false, error: 'Failed to upload transcript files.' }
+      }
+      
+      rawFilePaths.push(fileName)
     }
 
-    const { data: publicUrlData } = supabase.storage
-      .from('mom_evidences')
-      .getPublicUrl(evidenceFileName)
-
-    // 2. Upload Content File to 'mom_contents'
-    const contentExt = contentFile.name.split('.').pop()
-    const contentFileName = `${user.id}/${Date.now()}_content.${contentExt}`
-    
-    const { error: contentUploadError } = await supabase.storage
-      .from('mom_contents')
-      .upload(contentFileName, contentFile, {
-        upsert: false
-      })
-
-    if (contentUploadError) {
-      console.error('Content upload error:', contentUploadError)
-      // We don't rollback evidence here to keep it simple, but in production we should.
-      return { success: false, error: 'Failed to upload transcript/audio. Ensure mom_contents bucket exists and has correct policies.' }
-    }
-    
-    // We only need the internal path for deletion and processing later, but we can store the path.
-    const contentStoragePath = contentFileName;
-
-    // 3. Insert to Database
+    // Insert to Database
     const { data: momData, error: dbError } = await supabase
       .from('meeting_mom')
       .insert({
         user_id: user.id,
-        topic: agenda, // Map agenda to topic to avoid DB migration
+        topic: agenda, 
         meeting_date,
-        facilitator: user?.user_metadata?.full_name || user?.email || 'To Be Decided', // Set default facilitator
+        facilitator: facilitator, 
         participants: attendees.split(',').map(s => s.trim()).filter(Boolean), 
-        photo_evidence_url: publicUrlData.publicUrl,
         content_json: { 
           location,
           time,
           type_of_meeting, 
-          raw_file_path: contentStoragePath 
+          raw_file_paths: rawFilePaths 
         }, 
         ai_model_used: 'pending',
         status: 'draft',

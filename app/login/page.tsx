@@ -1,10 +1,11 @@
-import { login } from './actions'
+import { login, resendVerification } from './actions'
 import Link from 'next/link'
+import PasswordInput from '@/components/PasswordInput'
 
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string, message?: string, email?: string }>
 }) {
   const resolvedParams = await searchParams;
   
@@ -25,6 +26,20 @@ export default async function LoginPage({
             {resolvedParams.error}
           </div>
         )}
+        
+        {resolvedParams?.message && (
+          <div className="bg-green-50 text-green-600 p-4 rounded-lg text-sm text-center font-medium border border-green-200 shadow-sm">
+            {resolvedParams.message}
+            {resolvedParams.email && (
+              <form action={resendVerification} className="mt-3">
+                <input type="hidden" name="email" value={resolvedParams.email} />
+                <button type="submit" className="text-sm font-bold underline hover:text-green-800">
+                  Tidak menerima email? Kirim Ulang Verifikasi
+                </button>
+              </form>
+            )}
+          </div>
+        )}
 
         <form action={login} className="mt-8 space-y-6">
           <div className="space-y-4">
@@ -40,18 +55,13 @@ export default async function LoginPage({
                 placeholder="Email address" 
               />
             </div>
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <input 
-                id="password" 
-                name="password" 
-                type="password" 
-                autoComplete="current-password" 
-                required 
-                className="appearance-none relative block w-full px-4 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all sm:text-sm" 
-                placeholder="Password" 
-              />
-            </div>
+            <PasswordInput 
+              id="password" 
+              name="password" 
+              placeholder="Password" 
+              autoComplete="current-password" 
+              required 
+            />
           </div>
 
           <div className="flex items-center justify-between">
@@ -62,7 +72,7 @@ export default async function LoginPage({
               </label>
             </div>
             <div className="text-sm">
-              <a href="#" className="font-medium text-telkom-navy hover:text-blue-800">
+              <a href="/forgot-password" className="font-medium text-telkom-navy hover:text-blue-800">
                 Forgot your password?
               </a>
             </div>

@@ -1,23 +1,19 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { metadataSchema, contentSchema, evidenceSchema } from '@/utils/formSchemas'
-import { UploadCloud, CheckCircle2, FileText, Camera, AlertCircle, Loader2 } from 'lucide-react'
+import { metadataSchema, contentSchema } from '@/utils/formSchemas'
 import { submitMomDraft } from './actions'
-import { useRouter } from 'next/navigation'
+import { CheckCircle2, UploadCloud, FileText, AlertCircle, Loader2, Info } from 'lucide-react'
 
-interface NewMomFormProps {
-  userTier: string
-}
-
-export default function NewMomForm({ userTier }: NewMomFormProps) {
+export default function NewMomForm({ userTier }: { userTier: string }) {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Shared State for all steps
   const [formData, setFormData] = useState({
     agenda: '',
@@ -26,8 +22,8 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
     type_of_meeting: [] as string[],
     location: '',
     attendees: '',
-    contentFile: null as File | null,
-    evidenceFile: null as File | null,
+    facilitator: '',
+    contentFiles: [] as File[],
   })
 
   const isPremium = userTier === 'premium'
@@ -35,18 +31,13 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
   // Forms
   const { register: registerMeta, handleSubmit: handleMetaSubmit, formState: { errors: metaErrors } } = useForm({
     resolver: zodResolver(metadataSchema),
-    defaultValues: { agenda: formData.agenda, meeting_date: formData.meeting_date, time: formData.time, type_of_meeting: formData.type_of_meeting, location: formData.location, attendees: formData.attendees }
+    defaultValues: { agenda: formData.agenda, meeting_date: formData.meeting_date, time: formData.time, type_of_meeting: formData.type_of_meeting, location: formData.location, attendees: formData.attendees, facilitator: formData.facilitator }
   })
 
   const { register: registerContent, handleSubmit: handleContentSubmit, setValue: setContentValue, watch: watchContent, formState: { errors: contentErrors } } = useForm({
     resolver: zodResolver(contentSchema)
   })
-  const contentFile = watchContent('contentFile')
-
-  const { register: registerEvidence, handleSubmit: handleEvidenceSubmit, setValue: setEvidenceValue, watch: watchEvidence, formState: { errors: evidenceErrors } } = useForm({
-    resolver: zodResolver(evidenceSchema)
-  })
-  const evidenceFile = watchEvidence('evidenceFile')
+  const contentFiles = watchContent('contentFiles')
 
   // Step Handlers
   const onMetaSubmit = (data: any) => {
@@ -54,33 +45,31 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
     setStep(2)
   }
 
-  const onContentSubmit = (data: any) => {
-    setFormData(prev => ({ ...prev, contentFile: data.contentFile }))
-    setStep(3)
-  }
-
   const onFinalSubmit = async (data: any) => {
     setIsSubmitting(true)
     setError(null)
     
     try {
-      const finalData = { ...formData, evidenceFile: data.evidenceFile }
+      const finalData = { ...formData, contentFiles: data.contentFiles }
       
       const submitData = new FormData()
       submitData.append('agenda', finalData.agenda)
       submitData.append('meeting_date', finalData.meeting_date)
       submitData.append('time', finalData.time)
-      // Since it's an array, append each item separately or stringify
       submitData.append('type_of_meeting', JSON.stringify(finalData.type_of_meeting))
       submitData.append('location', finalData.location)
       submitData.append('attendees', finalData.attendees)
-      if (finalData.contentFile) submitData.append('contentFile', finalData.contentFile)
-      if (finalData.evidenceFile) submitData.append('evidenceFile', finalData.evidenceFile)
+      submitData.append('facilitator', finalData.facilitator)
+      
+      if (finalData.contentFiles && finalData.contentFiles.length > 0) {
+        for (let i = 0; i < finalData.contentFiles.length; i++) {
+          submitData.append('contentFiles', finalData.contentFiles[i])
+        }
+      }
 
       const result = await submitMomDraft(submitData)
       
       if (result.success) {
-        // Redirect to dashboard or success page
         router.push('/')
       } else {
         setError(result.error || 'Failed to submit form')
@@ -95,18 +84,17 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
   return (
     <div className="max-w-3xl mx-auto">
       {/* Stepper UI */}
-      <div className="mb-8">
+      <div className="mb-8 px-16">
         <div className="flex items-center justify-between relative">
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full z-0"></div>
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-telkom-red rounded-full z-0 transition-all duration-300" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
+          <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-telkom-red rounded-full z-0 transition-all duration-300" style={{ width: `${((step - 1) / 1) * 100}%` }}></div>
           
           {[
             { num: 1, label: 'Metadata' },
-            { num: 2, label: 'Content' },
-            { num: 3, label: 'Evidence' }
+            { num: 2, label: 'Transcript' }
           ].map((s) => (
-            <div key={s.num} className="relative z-10 flex flex-col items-center">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${step >= s.num ? 'bg-telkom-red text-white' : 'bg-gray-200 text-gray-500'}`}>
+            <div key={s.num} className="relative z-10 flex flex-col items-center bg-gray-50 px-2">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors ${step >= s.num ? 'bg-telkom-red text-white shadow-md' : 'bg-gray-200 text-gray-500'}`}>
                 {step > s.num ? <CheckCircle2 size={20} /> : s.num}
               </div>
               <span className={`mt-2 text-xs font-medium ${step >= s.num ? 'text-gray-900' : 'text-gray-500'}`}>{s.label}</span>
@@ -165,20 +153,27 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
                 {metaErrors.type_of_meeting && <p className="text-red-500 text-xs mt-1">{metaErrors.type_of_meeting.message as string}</p>}
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Venue / Link</label>
-                <input {...registerMeta('location')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="e.g. Zoom or Meeting Room A" />
-                {metaErrors.location && <p className="text-red-500 text-xs mt-1">{metaErrors.location.message as string}</p>}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location / Venue</label>
+                  <input {...registerMeta('location')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="e.g. Zoom or Room 302" />
+                  {metaErrors.location && <p className="text-red-500 text-xs mt-1">{metaErrors.location.message as string}</p>}
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Attendees (Comma separated)</label>
+                  <input {...registerMeta('attendees')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="e.g. John Doe, Jane Smith" />
+                  {metaErrors.attendees && <p className="text-red-500 text-xs mt-1">{metaErrors.attendees.message as string}</p>}
+                </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Attendees (Comma separated)</label>
-                <textarea {...registerMeta('attendees')} rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="John Doe, Jane Smith..."></textarea>
-                {metaErrors.attendees && <p className="text-red-500 text-xs mt-1">{metaErrors.attendees.message as string}</p>}
+                <label className="block text-sm font-medium text-gray-700 mb-1">Facilitator</label>
+                <input {...registerMeta('facilitator')} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" placeholder="e.g. Budi Santoso" />
+                {metaErrors.facilitator && <p className="text-red-500 text-xs mt-1">{metaErrors.facilitator.message as string}</p>}
               </div>
             </div>
 
-            <div className="flex justify-end pt-4">
+            <div className="pt-6 flex justify-end">
               <button type="submit" className="bg-telkom-navy text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-900 transition-colors">
                 Next Step
               </button>
@@ -186,117 +181,69 @@ export default function NewMomForm({ userTier }: NewMomFormProps) {
           </form>
         )}
 
-        {/* STEP 2: CONTENT */}
+        {/* STEP 2: TRANSCRIPT */}
         {step === 2 && (
-          <form onSubmit={handleContentSubmit(onContentSubmit)} className="space-y-6">
-             <div>
-              <h2 className="text-xl font-bold text-gray-900">Upload Content</h2>
+          <form onSubmit={handleContentSubmit(onFinalSubmit)} className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Upload Transcript</h2>
               <p className="text-sm text-gray-500 mt-1">
-                {isPremium ? "Upload your meeting transcript or audio recording." : "Upload your meeting transcript (.txt or .docx). Upgrade to Premium for audio support."}
+                Upload up to 5 transcript files (.txt, .docx). They will be combined by the AI to form the full meeting record.
               </p>
             </div>
 
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center bg-gray-50 hover:bg-gray-100 transition-colors">
-              <FileText className="text-gray-400 mb-4" size={48} />
-              
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:bg-gray-50 transition-colors relative">
               <input 
                 type="file" 
-                id="contentUpload" 
-                className="hidden" 
+                multiple
                 accept={isPremium ? ".txt,.docx,.mp3,.wav,.m4a" : ".txt,.docx"}
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) setContentValue('contentFile', file, { shouldValidate: true })
-                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                {...registerContent('contentFiles')}
               />
+              <UploadCloud className="mx-auto text-gray-400 mb-4" size={48} />
               
-              <label htmlFor="contentUpload" className="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors mb-2 shadow-sm">
-                Choose File
-              </label>
-              
-              {contentFile ? (
-                <p className="text-sm font-medium text-telkom-navy mt-2">Selected: {(contentFile as File).name}</p>
-              ) : (
-                <p className="text-xs text-gray-500 mt-2">
-                  {isPremium ? "Supported formats: TXT, DOCX, MP3, WAV, M4A" : "Supported formats: TXT, DOCX only"}
-                </p>
-              )}
-            </div>
-            {contentErrors.contentFile && <p className="text-red-500 text-xs text-center">{contentErrors.contentFile.message as string}</p>}
-
-            <div className="flex justify-between pt-4">
-              <button type="button" onClick={() => setStep(1)} className="text-gray-600 font-medium px-6 py-2 hover:bg-gray-100 rounded-lg transition-colors">
-                Back
-              </button>
-              <button type="submit" className="bg-telkom-navy text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-900 transition-colors">
-                Next Step
-              </button>
-            </div>
-          </form>
-        )}
-
-        {/* STEP 3: EVIDENCE */}
-        {step === 3 && (
-          <form onSubmit={handleEvidenceSubmit(onFinalSubmit)} className="space-y-6">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Upload Evidence</h2>
-              <p className="text-sm text-gray-500 mt-1">Upload a photo of the meeting (Max 3MB).</p>
-            </div>
-
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center text-center bg-gray-50 hover:bg-gray-100 transition-colors">
-              {evidenceFile ? (
-                <div className="mb-4 relative group">
-                  <div className="w-40 h-40 rounded-lg overflow-hidden border border-gray-200 shadow-sm mx-auto relative">
-                    <img 
-                      src={URL.createObjectURL(evidenceFile as File)} 
-                      alt="Evidence Preview" 
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <p className="text-sm font-medium text-telkom-navy mt-3 truncate max-w-xs mx-auto px-4" title={(evidenceFile as File).name}>
-                    Selected: {(evidenceFile as File).name}
-                  </p>
+              {contentFiles && contentFiles.length > 0 ? (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-telkom-navy">{contentFiles.length} file(s) selected:</p>
+                  <ul className="text-xs text-gray-500 inline-block text-left list-disc list-inside">
+                    {Array.from(contentFiles).map((f: any, i) => (
+                      <li key={i}>{f.name} ({(f.size / 1024 / 1024).toFixed(2)} MB)</li>
+                    ))}
+                  </ul>
                 </div>
               ) : (
-                <Camera className="text-gray-400 mb-4" size={48} />
-              )}
-              
-              <input 
-                type="file" 
-                id="evidenceUpload" 
-                className="hidden" 
-                accept="image/jpeg,image/png,image/jpg"
-                onChange={(e) => {
-                  const file = e.target.files?.[0]
-                  if (file) setEvidenceValue('evidenceFile', file, { shouldValidate: true })
-                }}
-              />
-              
-              <label htmlFor="evidenceUpload" className="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors mb-2 shadow-sm">
-                {evidenceFile ? 'Change Photo' : 'Choose Photo'}
-              </label>
-              
-              {!evidenceFile && (
-                <p className="text-xs text-gray-500 mt-2">Supported formats: JPG, PNG (Max 3MB)</p>
+                <>
+                  <p className="text-sm font-medium text-gray-900 mb-1">Click to upload or drag and drop</p>
+                  <p className="text-xs text-gray-500">
+                    Max 5 files. {isPremium ? 'TXT, DOCX, MP3, WAV up to 20MB.' : 'TXT, DOCX up to 20MB each.'}
+                  </p>
+                </>
               )}
             </div>
-            {evidenceErrors.evidenceFile && <p className="text-red-500 text-xs text-center">{evidenceErrors.evidenceFile.message as string}</p>}
+            
+            {contentErrors.contentFiles && <p className="text-red-500 text-xs mt-1 text-center">{contentErrors.contentFiles.message as string}</p>}
 
-            <div className="flex justify-between pt-4">
-              <button type="button" onClick={() => setStep(2)} disabled={isSubmitting} className="text-gray-600 font-medium px-6 py-2 hover:bg-gray-100 rounded-lg transition-colors">
+            {!isPremium && (
+              <div className="bg-blue-50 text-blue-800 p-4 rounded-lg flex gap-3 text-sm border border-blue-100">
+                <Info className="shrink-0" size={20} />
+                <p>Free tier allows text formats only. <a href="/settings" className="font-bold underline">Upgrade to Premium</a> to support audio uploads.</p>
+              </div>
+            )}
+
+            <div className="pt-6 flex justify-between">
+              <button type="button" onClick={() => setStep(1)} className="text-gray-600 font-medium hover:text-gray-900 px-4 py-2">
                 Back
               </button>
-              <button type="submit" disabled={isSubmitting} className="bg-telkom-red text-white px-6 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2 shadow-sm">
-                {isSubmitting ? (
-                  <><Loader2 size={18} className="animate-spin" /> Saving Draft...</>
-                ) : (
-                  <><UploadCloud size={18} /> Save & Process Later</>
-                )}
+              <button 
+                type="submit" 
+                disabled={isSubmitting}
+                className="bg-telkom-red text-white px-6 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2 disabled:opacity-70"
+              >
+                {isSubmitting && <Loader2 size={18} className="animate-spin" />}
+                {isSubmitting ? 'Generating Draft...' : 'Generate MoM'}
               </button>
             </div>
           </form>
         )}
-
       </div>
     </div>
   )

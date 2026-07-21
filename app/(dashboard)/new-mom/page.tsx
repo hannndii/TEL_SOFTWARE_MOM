@@ -1,6 +1,8 @@
 import { createClient } from '@/utils/supabase/server'
 import NewMomForm from './NewMomForm'
 
+export const dynamic = 'force-dynamic';
+
 export default async function NewMomPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

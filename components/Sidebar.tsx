@@ -12,8 +12,8 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
   const displayTier = userTier === 'premium' ? 'Premium Tier' : 'Free Tier';
 
   return (
-    <aside className="w-64 bg-telkom-navy text-white min-h-screen flex flex-col shadow-lg shrink-0">
-      <div className="p-6 border-b border-white/10">
+    <aside className="w-64 bg-telkom-navy text-white h-full flex flex-col shadow-lg shrink-0 overflow-y-auto">
+      <div className="p-6 border-b border-white/10 shrink-0">
         <h1 className="text-2xl font-bold tracking-tight">
           TEL<span className="text-telkom-red">MOM</span>
         </h1>

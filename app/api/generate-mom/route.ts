@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { GoogleGenAI } from '@google/genai'
+import mammoth from 'mammoth'
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 
@@ -49,22 +50,72 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Daily quota exceeded. Please upgrade to Premium.' }, { status: 403 })
     }
 
-    // 3. Download the raw content file from Storage
-    const rawFilePath = momData.content_json?.raw_file_path
-    if (!rawFilePath) {
-      return NextResponse.json({ error: 'Raw file path not found in draft' }, { status: 400 })
+    // 3. Download ALL raw content files from Storage
+    // Fallback to raw_file_path if raw_file_paths doesn't exist (for older drafts)
+    const rawFilePaths: string[] = momData.content_json?.raw_file_paths || 
+      (momData.content_json?.raw_file_path ? [momData.content_json.raw_file_path] : [])
+      
+    if (rawFilePaths.length === 0) {
+      return NextResponse.json({ error: 'Raw file paths not found in draft' }, { status: 400 })
     }
 
-    const { data: fileBlob, error: downloadError } = await supabase.storage
-      .from('mom_contents')
-      .download(rawFilePath)
+    const downloadedFiles = []
+    
+    for (const filePath of rawFilePaths) {
+      const { data: fileBlob, error: downloadError } = await supabase.storage
+        .from('mom_contents')
+        .download(filePath)
 
-    if (downloadError || !fileBlob) {
-      return NextResponse.json({ error: 'Failed to download raw file from storage' }, { status: 500 })
+      if (downloadError || !fileBlob) {
+        return NextResponse.json({ error: `Failed to download raw file: ${filePath}` }, { status: 500 })
+      }
+      
+      const arrayBuffer = await fileBlob.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      
+      const fileName = filePath.toLowerCase()
+      
+      if (fileName.endsWith('.docx') || fileBlob.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        // Extract text using mammoth
+        try {
+          const result = await mammoth.extractRawText({ buffer })
+          const text = result.value
+          
+          downloadedFiles.push({
+            type: 'text',
+            text: text,
+            name: filePath
+          })
+        } catch(e) {
+          console.error("Mammoth error", e)
+          return NextResponse.json({ error: 'Failed to extract text from .docx' }, { status: 500 })
+        }
+      } else if (fileName.endsWith('.mp3') || fileName.endsWith('.wav') || fileName.endsWith('.m4a') || fileBlob.type.startsWith('audio/')) {
+        // Audio
+        let mimeType = fileBlob.type
+        if (!mimeType || mimeType === 'application/octet-stream') {
+          if (fileName.endsWith('.wav')) mimeType = 'audio/wav'
+          else if (fileName.endsWith('.m4a')) mimeType = 'audio/mp4'
+          else mimeType = 'audio/mp3'
+        }
+        
+        downloadedFiles.push({
+          type: 'inlineData',
+          base64Data: buffer.toString('base64'),
+          mimeType: mimeType
+        })
+      } else {
+        // Assume text file
+        downloadedFiles.push({
+          type: 'inlineData',
+          base64Data: buffer.toString('base64'),
+          mimeType: 'text/plain'
+        })
+      }
     }
 
     // 4. Generate MoM using Gemini API
-    const systemPrompt = `You are a professional corporate secretary assistant for Telkom Indonesia. Your task is to extract meeting minutes from the provided document and format it strictly matching this template.
+    const systemPrompt = `You are a professional corporate secretary assistant for Telkom Indonesia. Your task is to extract meeting minutes from the provided document(s) and format it strictly matching this template. If multiple documents are provided, treat them as parts of a single continuous meeting.
 Output the result strictly as a valid JSON object with the following schema:
 {
   "dasar_pembahasan": ["Array of strings representing the main topics discussed (Dasar Pembahasan)"],
@@ -94,21 +145,31 @@ Meeting Topic: ${momData.topic}
 Date: ${momData.meeting_date}
 Participants: ${momData.participants.join(', ')}
 
-Please analyze the attached meeting transcript document.
+Please analyze the attached meeting transcript document(s).
 `
 
-    // Convert blob to base64 for inline data
-    const arrayBuffer = await fileBlob.arrayBuffer()
-    const base64Data = Buffer.from(arrayBuffer).toString('base64')
+    // Build parts array
+    const parts: any[] = [
+      { text: systemPrompt + userPrompt }
+    ]
+    
+    // Append all parts
+    for (const file of downloadedFiles) {
+      if (file.type === 'text') {
+        parts.push({
+          text: `\n\n--- Document Transcript ---\n${file.text}`
+        })
+      } else if (file.type === 'inlineData') {
+        parts.push({
+          inlineData: { data: file.base64Data, mimeType: file.mimeType }
+        })
+      }
+    }
 
     const response = await ai.models.generateContent({
       model: 'gemini-flash-latest',
       contents: [
-        { role: 'user', parts: [
-            { text: systemPrompt + userPrompt },
-            { inlineData: { data: base64Data, mimeType: fileBlob.type || 'text/plain' } }
-          ] 
-        }
+        { role: 'user', parts }
       ],
       config: {
         responseMimeType: 'application/json',
@@ -125,8 +186,10 @@ Please analyze the attached meeting transcript document.
 
     const generatedJson = JSON.parse(resultText)
 
-    // Preserve the location from the original draft
+    // Preserve the location & time from the original draft
     generatedJson.location = momData.content_json.location
+    generatedJson.time = momData.content_json.time
+    generatedJson.type_of_meeting = momData.content_json.type_of_meeting
 
     // 5. Update Database (Update content_json, status, and AI model)
     const { error: updateError } = await supabase
@@ -134,7 +197,7 @@ Please analyze the attached meeting transcript document.
       .update({
         content_json: generatedJson,
         ai_model_used: 'gemini-flash-latest',
-        status: 'exported', // we use 'exported' or 'completed' to signify it's done
+        status: 'exported', 
         updated_at: new Date().toISOString()
       })
       .eq('id', momId)
@@ -151,10 +214,12 @@ Please analyze the attached meeting transcript document.
         .eq('id', user.id)
     }
 
-    // 7. Delete Raw File from Storage
-    await supabase.storage
-      .from('mom_contents')
-      .remove([rawFilePath])
+    // 7. Delete Raw Files from Storage
+    if (rawFilePaths.length > 0) {
+      await supabase.storage
+        .from('mom_contents')
+        .remove(rawFilePaths)
+    }
 
     return NextResponse.json({ success: true, id: momId })
   } catch (error: any) {
