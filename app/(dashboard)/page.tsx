@@ -124,10 +124,10 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-white border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider">
-                    <th className="px-6 py-4 font-bold w-1/2">Meeting Topic</th>
-                    <th className="px-6 py-4 font-bold">Date</th>
-                    <th className="px-6 py-4 font-bold">Status</th>
-                    <th className="px-6 py-4 font-bold text-right">Action</th>
+                    <th className="px-6 py-4 font-bold">Meeting Topic</th>
+                    <th className="px-6 py-4 font-bold w-32 lg:w-40">Date</th>
+                    <th className="px-6 py-4 font-bold w-32 text-center">Status</th>
+                    <th className="px-6 py-4 font-bold w-48 text-right">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white">
@@ -144,7 +144,7 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                           {new Date(mom.meeting_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                         </div>
                       </td>
-                      <td className="px-6 py-5">
+                      <td className="px-6 py-5 text-center">
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold capitalize ${
                           mom.status === 'draft' 
                             ? 'bg-amber-100 text-amber-700' 
