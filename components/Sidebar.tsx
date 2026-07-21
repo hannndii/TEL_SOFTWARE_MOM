@@ -1,6 +1,9 @@
+'use client';
+
 import Link from "next/link";
 import { LayoutDashboard, FileText, Settings, LogOut } from "lucide-react";
 import { logout } from "@/app/login/actions";
+import { usePathname } from "next/navigation";
 
 interface SidebarProps {
   userEmail?: string;
@@ -8,8 +11,36 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ userEmail = "Guest", userTier = "free" }: SidebarProps) {
+  const pathname = usePathname();
   const initial = userEmail.charAt(0).toUpperCase();
   const displayTier = userTier === 'premium' ? 'Premium Tier' : 'Free Tier';
+
+  // Helper function to check if link is active
+  const isActive = (path: string) => {
+    if (path === '/' && pathname !== '/') return false;
+    return pathname?.startsWith(path);
+  };
+
+  const getLinkClasses = (path: string) => {
+    const active = isActive(path);
+    if (active) {
+      return "flex items-center gap-3 px-4 py-3 rounded-lg bg-telkom-red text-white hover:bg-red-600 transition-all group shadow-md";
+    }
+    return "flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors group text-gray-300 hover:text-white";
+  };
+
+  const getIconClasses = (path: string) => {
+    const active = isActive(path);
+    if (active) {
+      return "text-white group-hover:scale-110 transition-transform";
+    }
+    return "text-gray-400 group-hover:text-white transition-colors";
+  };
+
+  const getTextClasses = (path: string) => {
+    const active = isActive(path);
+    return active ? "font-bold tracking-wide" : "font-medium";
+  };
 
   return (
     <aside className="w-64 bg-telkom-navy text-white h-full flex flex-col shadow-lg shrink-0 overflow-y-auto">
@@ -21,26 +52,17 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free" }: Side
       </div>
 
       <nav className="flex-1 py-6 px-4 space-y-2">
-        <Link
-          href="/"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors"
-        >
-          <LayoutDashboard size={20} />
-          <span className="font-medium">Dashboard</span>
+        <Link href="/" className={getLinkClasses('/')}>
+          <LayoutDashboard size={20} className={getIconClasses('/')} />
+          <span className={getTextClasses('/')}>Dashboard</span>
         </Link>
-        <Link
-          href="/new-mom"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg bg-telkom-red text-white hover:bg-red-600 transition-all group shadow-md"
-        >
-          <FileText size={20} className="text-white group-hover:scale-110 transition-transform" />
-          <span className="font-bold tracking-wide">Generate AI MoM</span>
+        <Link href="/new-mom" className={getLinkClasses('/new-mom')}>
+          <FileText size={20} className={getIconClasses('/new-mom')} />
+          <span className={getTextClasses('/new-mom')}>Generate AI MoM</span>
         </Link>
-        <Link
-          href="/settings"
-          className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-colors"
-        >
-          <Settings size={20} />
-          <span className="font-medium">Settings</span>
+        <Link href="/settings" className={getLinkClasses('/settings')}>
+          <Settings size={20} className={getIconClasses('/settings')} />
+          <span className={getTextClasses('/settings')}>Settings</span>
         </Link>
       </nav>
 
