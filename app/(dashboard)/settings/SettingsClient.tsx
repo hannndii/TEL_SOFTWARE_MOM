@@ -58,15 +58,20 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert('File too large. Maximum size is 2MB.')
+    // Limit size to 5MB and type to JPEG
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File too large. Maximum size is 5MB.')
+      return
+    }
+    
+    if (file.type !== 'image/jpeg' && file.type !== 'image/jpg') {
+      alert('Only JPEG/JPG files are allowed.')
       return
     }
 
     setIsUploading(true)
     try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${userProfile.id}-${Math.random()}.${fileExt}`
+      const fileName = `${userProfile.id}-${Math.random()}.jpg`
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
@@ -173,37 +178,13 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                         type="file" 
                         ref={fileInputRef} 
                         onChange={handleAvatarUpload} 
-                        accept="image/*" 
+                        accept="image/jpeg, image/jpg" 
                         className="hidden" 
                       />
                     </div>
                     
                     <div className="text-center space-y-3">
-                      {isEditingName ? (
-                        <div className="flex items-center gap-2">
-                          <input 
-                            type="text" 
-                            value={fullName}
-                            onChange={(e) => setFullName(e.target.value)}
-                            className="px-3 py-1.5 border border-slate-300 rounded-lg text-center text-lg font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-telkom-red w-48"
-                            placeholder="Your Name"
-                            autoFocus
-                          />
-                          <button onClick={handleSaveName} disabled={isSavingProfile} className="p-1.5 bg-green-50 text-green-600 hover:bg-green-100 rounded-md transition-colors">
-                            {isSavingProfile ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-                          </button>
-                          <button onClick={() => {setIsEditingName(false); setFullName(userProfile?.full_name || '')}} className="p-1.5 bg-slate-50 text-slate-600 hover:bg-slate-100 rounded-md transition-colors">
-                            <X size={16} />
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center gap-2 group">
-                          <h3 className="text-xl font-bold text-slate-900">{userProfile?.full_name || userEmail.split('@')[0]}</h3>
-                          <button onClick={() => setIsEditingName(true)} className="text-slate-400 hover:text-telkom-red opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Edit2 size={14} />
-                          </button>
-                        </div>
-                      )}
+                      <h3 className="text-xl font-bold text-slate-900">{userProfile?.full_name || userEmail.split('@')[0]}</h3>
                       
                       {isPremium ? (
                         <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-yellow-700/10 via-yellow-500/10 to-yellow-600/10 border border-yellow-500/30 text-yellow-700 shadow-[0_0_15px_rgba(234,179,8,0.15)] relative overflow-hidden group">
@@ -227,15 +208,53 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                     </div>
 
                     <div className="space-y-6 max-w-xl mx-auto">
+                      {/* Name Edit Field */}
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <label className="flex items-center gap-2 text-sm font-medium text-slate-600">
+                            <User size={16} className="text-slate-400" /> Full Name
+                          </label>
+                          {!isEditingName && (
+                            <button onClick={() => setIsEditingName(true)} className="text-xs font-medium text-telkom-red hover:text-red-700 flex items-center gap-1">
+                              <Edit2 size={12} /> Edit Name
+                            </button>
+                          )}
+                        </div>
+                        {isEditingName ? (
+                          <div className="flex items-center gap-2">
+                            <input 
+                              type="text" 
+                              value={fullName}
+                              onChange={(e) => setFullName(e.target.value)}
+                              className="flex-1 px-4 py-2.5 border border-slate-300 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-telkom-red"
+                              placeholder="Enter your full name"
+                              autoFocus
+                            />
+                            <button onClick={handleSaveName} disabled={isSavingProfile} className="px-4 py-2.5 bg-telkom-red text-white hover:bg-red-600 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium">
+                              {isSavingProfile ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />} Save
+                            </button>
+                            <button onClick={() => {setIsEditingName(false); setFullName(userProfile?.full_name || '')}} className="p-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">
+                              <X size={16} />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm">
+                            {userProfile?.full_name || <span className="text-slate-400 italic">Not set</span>}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Email Field */}
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-2">
                           <User size={16} className="text-slate-400" /> Email Address
                         </label>
-                        <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900">
+                        <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm">
                           {userEmail}
                         </div>
                       </div>
                       
+                      {/* Account ID Field */}
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-slate-600 mb-2">
                           <Shield size={16} className="text-slate-400" /> Account ID
