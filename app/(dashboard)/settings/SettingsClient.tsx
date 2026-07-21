@@ -130,11 +130,8 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
 
   return (
     <div className="w-full">
-      {/* PREMIUM HEADER */}
+      {/* HEADER */}
       <div className="relative bg-gradient-to-r from-telkom-navy to-[#1e2840] pt-12 pb-16 px-8 -mx-8 -mt-8 rounded-b-3xl shadow-inner overflow-hidden mb-8">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="absolute bottom-0 left-10 w-40 h-40 bg-telkom-red opacity-10 rounded-full blur-2xl translate-y-1/2"></div>
-        
         <div className="relative z-10 max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-white tracking-tight">Account Settings</h1>
           <p className="text-gray-300 mt-2 text-sm font-medium">Manage your profile, preferences, and billing.</p>
@@ -187,14 +184,13 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                       <h3 className="text-xl font-bold text-slate-900">{userProfile?.full_name || userEmail.split('@')[0]}</h3>
                       
                       {isPremium ? (
-                        <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-yellow-700/10 via-yellow-500/10 to-yellow-600/10 border border-yellow-500/30 text-yellow-700 shadow-[0_0_15px_rgba(234,179,8,0.15)] relative overflow-hidden group">
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
-                          <Crown size={14} className="text-yellow-600 drop-shadow-sm" />
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-yellow-50 border border-yellow-200 text-yellow-700 shadow-sm">
+                          <Crown size={14} className="text-yellow-600" />
                           <span className="text-xs font-bold tracking-wide uppercase">Premium Member</span>
                         </div>
                       ) : (
-                        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-slate-600">
-                          <span className="text-xs font-semibold">Free Member</span>
+                        <div className="inline-flex items-center px-3 py-1 rounded-md bg-slate-50 border border-slate-200 text-slate-600 text-sm font-medium">
+                          Free Member
                         </div>
                       )}
                     </div>
@@ -302,44 +298,44 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                   </div>
                 )}
 
-                        <form id="password-form" action={handlePasswordUpdate} className="space-y-6 max-w-xl">
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-slate-700 mb-1.5">Current Password</label>
-                              <PasswordInput 
-                                id="currentPassword"
-                                name="currentPassword"
-                                placeholder="Enter your current password"
-                                required
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-slate-700 mb-1.5">New Password</label>
-                              <PasswordInput 
-                                id="password"
-                                name="password"
-                                placeholder="At least 6 characters"
-                                required
-                                minLength={6}
-                              />
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-slate-700 mb-1.5">Confirm New Password</label>
-                              <PasswordInput 
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                placeholder="Repeat new password"
-                                required
-                                minLength={6}
-                              />
-                            </div>
-                          </div>         
+                <form id="password-form" action={handlePasswordUpdate} className="space-y-6 max-w-xl">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">Current Password</label>
+                      <PasswordInput 
+                        id="currentPassword"
+                        name="currentPassword"
+                        placeholder="Enter your current password"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">New Password</label>
+                      <PasswordInput 
+                        id="password"
+                        name="password"
+                        placeholder="At least 6 characters"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1.5">Confirm New Password</label>
+                      <PasswordInput 
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="Repeat new password"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  </div>         
                   <button 
                     type="submit"
                     disabled={isPending}
-                    className="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2 rounded-lg font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
+                    className="bg-gray-900 hover:bg-gray-800 text-white px-5 py-2 rounded-md font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
                   >
                     {isPending ? <Loader2 size={16} className="animate-spin" /> : null}
                     Update Password
@@ -359,7 +355,7 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                 <button 
                   onClick={handleDeleteAccount}
                   disabled={isPending}
-                  className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-5 py-2 rounded-lg font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
+                  className="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-5 py-2 rounded-md font-medium transition-colors disabled:opacity-70 flex items-center gap-2"
                 >
                   {isPending ? <Loader2 size={16} className="animate-spin" /> : null}
                   Delete Account
@@ -397,9 +393,9 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                 {/* Plan Comparison */}
                 <div className="grid md:grid-cols-2 gap-6">
                   {/* Free Plan */}
-                  <div className={`relative p-6 rounded-2xl border-2 transition-all ${!isPremium ? 'border-gray-900 shadow-lg' : 'border-gray-100 hover:border-gray-200 opacity-70'}`}>
+                  <div className={`relative p-6 rounded-2xl border-2 transition-all ${!isPremium ? 'border-gray-900' : 'border-gray-100 hover:border-gray-200 opacity-70'}`}>
                     {!isPremium && (
-                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide">
+                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-gray-900 text-white px-3 py-1 rounded-md text-xs font-bold tracking-wide">
                         CURRENT
                       </div>
                     )}
@@ -427,14 +423,14 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
                   </div>
 
                   {/* Premium Plan */}
-                  <div className={`relative p-6 rounded-2xl border-2 transition-all ${isPremium ? 'border-telkom-red shadow-lg bg-red-50/10' : 'border-red-100 hover:border-telkom-red/50 bg-white'}`}>
+                  <div className={`relative p-6 rounded-2xl border-2 transition-all ${isPremium ? 'border-telkom-red bg-red-50/10' : 'border-red-100 hover:border-telkom-red/50 bg-white'}`}>
                     {isPremium ? (
-                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-telkom-red text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide flex items-center gap-1">
+                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-telkom-red text-white px-3 py-1 rounded-md text-xs font-bold tracking-wide flex items-center gap-1">
                         <CheckCircle2 size={14} /> ACTIVE
                       </div>
                     ) : (
-                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide shadow-sm">
-                        RECOMMENDED
+                      <div className="absolute top-0 right-6 -translate-y-1/2 bg-telkom-red text-white px-3 py-1 rounded-md text-xs font-bold tracking-wide">
+                        MOST POPULAR
                       </div>
                     )}
                     <h3 className="text-xl font-bold text-gray-900 text-telkom-navy">Professional</h3>

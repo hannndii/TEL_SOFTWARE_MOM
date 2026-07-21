@@ -39,9 +39,6 @@ export default async function Dashboard() {
     <div className="w-full">
       {/* 1. STUNNING HEADER */}
       <div className="relative bg-gradient-to-r from-telkom-navy to-[#1e2840] pt-12 pb-24 px-8 -mx-8 -mt-8 rounded-b-3xl shadow-inner overflow-hidden">
-        {/* Subtle background decoration */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-        <div className="absolute bottom-0 left-10 w-40 h-40 bg-telkom-red opacity-10 rounded-full blur-2xl translate-y-1/2"></div>
         
         <div className="relative z-10 max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div>
@@ -50,7 +47,7 @@ export default async function Dashboard() {
           </div>
           <Link 
             href="/new-mom" 
-            className="group flex items-center gap-2 bg-telkom-red hover:bg-red-600 text-white px-6 py-3 rounded-full font-semibold transition-all shadow-[0_4px_14px_0_rgba(229,42,58,0.39)] hover:shadow-[0_6px_20px_rgba(229,42,58,0.23)] hover:-translate-y-0.5"
+            className="group flex items-center gap-2 bg-telkom-red hover:bg-red-700 text-white px-6 py-2.5 rounded-md font-semibold transition-colors shadow-sm"
           >
             <Plus size={20} className="transition-transform group-hover:rotate-90" />
             Create New MoM
@@ -164,14 +161,14 @@ export default async function Dashboard() {
             </div>
           ) : (
             <div className="p-8 text-center py-20 flex flex-col items-center">
-              <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+              <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
                 <FileText size={32} className="text-gray-300" />
               </div>
               <h3 className="text-lg font-bold text-gray-900">No meeting minutes yet</h3>
               <p className="text-gray-500 mt-2 text-sm max-w-sm">You haven't generated any MoM documents. Create your first document to see it appear here.</p>
               <Link 
                 href="/new-mom" 
-                className="mt-6 bg-gray-900 hover:bg-black text-white px-6 py-2.5 rounded-lg font-medium transition-colors"
+                className="mt-6 bg-telkom-navy hover:bg-blue-900 text-white px-6 py-2.5 rounded-md font-medium transition-colors shadow-sm"
               >
                 Create Document
               </Link>
