@@ -145,7 +145,7 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
           {/* PROFILE TAB */}
           {activeTab === 'profile' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200">
                 <div className="flex flex-col items-center space-y-8">
                   
                   {/* Avatar Section */}
@@ -286,7 +286,7 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
           {activeTab === 'security' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
               {/* Change Password Card */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                 <div className="flex items-center gap-2 mb-4">
                   <Key className="text-gray-400" size={20} />
                   <h2 className="text-lg font-bold text-gray-900">Change Password</h2>
@@ -367,7 +367,7 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
           {/* BILLING TAB */}
           {activeTab === 'billing' && (
             <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-300">
-              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100">
+              <div className="bg-white p-6 md:p-8 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200">
                 <div className="mb-8">
                   <h2 className="text-2xl font-bold text-gray-900">Subscription Plan</h2>
                   <p className="text-gray-500 mt-2">Manage your billing and choose the right plan for your team's needs.</p>

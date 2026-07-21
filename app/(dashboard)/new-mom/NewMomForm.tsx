@@ -114,7 +114,7 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
         </div>
       )}
 
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
         
         {/* STEP 1: METADATA */}
         {step === 1 && (

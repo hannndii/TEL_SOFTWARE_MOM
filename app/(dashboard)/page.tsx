@@ -59,7 +59,7 @@ export default async function Dashboard() {
         
         {/* 2. STATS CARDS (Overlapping Header) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-4 md:px-0">
-          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-5 transition-transform hover:-translate-y-1">
+          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200 flex items-center gap-5 transition-transform hover:-translate-y-1">
             <div className="p-4 bg-blue-50 text-blue-600 rounded-xl">
               <FileText size={28} />
             </div>
@@ -69,7 +69,7 @@ export default async function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-5 transition-transform hover:-translate-y-1">
+          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200 flex items-center gap-5 transition-transform hover:-translate-y-1">
             <div className="p-4 bg-orange-50 text-orange-500 rounded-xl">
               <Clock size={28} />
             </div>
@@ -79,7 +79,7 @@ export default async function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex items-center gap-5 transition-transform hover:-translate-y-1">
+          <div className="bg-white p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200 flex items-center gap-5 transition-transform hover:-translate-y-1">
             <div className="p-4 bg-green-50 text-green-500 rounded-xl">
               <BarChart3 size={28} />
             </div>
@@ -98,8 +98,8 @@ export default async function Dashboard() {
         </div>
 
         {/* 3. PROFESSIONAL TABLE */}
-        <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden mx-4 md:mx-0">
-          <div className="p-6 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+        <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-200 overflow-hidden mx-4 md:mx-0">
+          <div className="p-6 border-b border-gray-200 bg-gray-50/50 flex justify-between items-center">
             <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
               <FileArchive size={20} className="text-telkom-navy" />
               Recent Meeting Minutes
@@ -110,16 +110,16 @@ export default async function Dashboard() {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-white border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider divide-x divide-gray-100">
+                  <tr className="bg-white border-b border-gray-200 text-xs text-gray-500 uppercase tracking-wider divide-x divide-gray-200">
                     <th className="px-6 py-4 font-bold w-1/2">Meeting Topic</th>
                     <th className="px-6 py-4 font-bold">Date</th>
                     <th className="px-6 py-4 font-bold">Status</th>
                     <th className="px-6 py-4 font-bold text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100 bg-white">
+                <tbody className="divide-y divide-gray-200 bg-white">
                   {recentMoms.map((mom) => (
-                    <tr key={mom.id} className="hover:bg-blue-50/50 transition-colors group divide-x divide-gray-100">
+                    <tr key={mom.id} className="hover:bg-blue-50/50 transition-colors group divide-x divide-gray-200">
                       <td className="px-6 py-5">
                         <div className="flex flex-col">
                           <span className="text-sm font-bold text-gray-900 group-hover:text-telkom-navy transition-colors">{mom.topic}</span>
@@ -161,7 +161,7 @@ export default async function Dashboard() {
             </div>
           ) : (
             <div className="p-8 text-center py-20 flex flex-col items-center">
-              <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-100">
+              <div className="w-20 h-20 bg-gray-50 rounded-2xl flex items-center justify-center mb-4 border border-gray-200">
                 <FileText size={32} className="text-gray-300" />
               </div>
               <h3 className="text-lg font-bold text-gray-900">No meeting minutes yet</h3>
