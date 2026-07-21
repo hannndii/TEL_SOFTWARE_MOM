@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from "react";
-import { MoreVertical, Loader2, AlertTriangle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { MoreVertical, Loader2, AlertTriangle, Trash2 } from "lucide-react";
 import { deleteMom } from "./actions";
 
 export default function DeleteMomButton({ momId }: { momId: string }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -19,16 +21,44 @@ export default function DeleteMomButton({ momId }: { momId: string }) {
     }
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    if (showDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showDropdown]);
+
   return (
-    <>
+    <div className="relative" ref={dropdownRef}>
       <button 
-        onClick={() => setShowModal(true)}
+        onClick={() => setShowDropdown(!showDropdown)}
         disabled={isDeleting}
-        className="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-100 transition-colors disabled:opacity-50"
-        title="Delete MoM"
+        className="text-gray-400 hover:text-gray-700 p-1.5 rounded hover:bg-gray-100 transition-colors disabled:opacity-50 focus:outline-none"
+        title="Options"
       >
         <MoreVertical size={20} />
       </button>
+
+      {showDropdown && (
+        <div className="absolute right-0 mt-1 w-36 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-20 animate-in fade-in zoom-in-95 duration-100">
+          <button
+            onClick={() => {
+              setShowDropdown(false);
+              setShowModal(true);
+            }}
+            className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 font-medium transition-colors"
+          >
+            <Trash2 size={16} /> Delete
+          </button>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -62,6 +92,6 @@ export default function DeleteMomButton({ momId }: { momId: string }) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

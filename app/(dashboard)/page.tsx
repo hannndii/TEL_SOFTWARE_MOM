@@ -127,7 +127,8 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                     <th className="px-6 py-4 font-bold">Meeting Topic</th>
                     <th className="px-6 py-4 font-bold w-32 lg:w-40">Date</th>
                     <th className="px-6 py-4 font-bold w-32 text-center">Status</th>
-                    <th className="px-6 py-4 font-bold w-48 text-right">Action</th>
+                    <th className="px-6 py-4 font-bold w-32 text-right">Action</th>
+                    <th className="px-4 py-4 font-bold w-16"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white">
@@ -155,16 +156,16 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                         </span>
                       </td>
                       <td className="px-6 py-5 text-right">
-                        <div className="flex items-center justify-end gap-3 opacity-80 group-hover:opacity-100 transition-opacity">
-                          <Link 
-                            href={`/mom/${mom.id}`} 
-                            className="flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-1.5 rounded-md"
-                          >
-                            {mom.status === 'draft' ? 'Continue' : 'View'}
-                            <ChevronRight size={16} className="ml-1" />
-                          </Link>
-                          <DeleteMomButton momId={mom.id} />
-                        </div>
+                        <Link 
+                          href={`/mom/${mom.id}`} 
+                          className="inline-flex items-center justify-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors bg-blue-50 hover:bg-blue-100 px-4 py-1.5 rounded-md w-28"
+                        >
+                          {mom.status === 'draft' ? 'Generate' : 'View'}
+                          <ChevronRight size={16} className="ml-1" />
+                        </Link>
+                      </td>
+                      <td className="px-4 py-5 text-center">
+                        <DeleteMomButton momId={mom.id} />
                       </td>
                     </tr>
                   ))}
