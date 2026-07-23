@@ -22,7 +22,8 @@ export async function POST(request: Request) {
 
     const authString = Buffer.from(`${serverKey}:`).toString('base64')
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const origin = request.headers.get('origin')
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin || 'http://localhost:3000'
 
     const payload = {
       transaction_details: {
