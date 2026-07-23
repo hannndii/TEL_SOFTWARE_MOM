@@ -44,12 +44,12 @@ export default async function LoginPage({
         )}
 
         <form action={login} className="mt-8 space-y-6">
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+              <label htmlFor="email" className="block text-xs font-semibold text-gray-700 mb-2">Email address</label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                  <Mail size={20} />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                  <Mail size={18} strokeWidth={2} />
                 </div>
                 <input 
                   id="email" 
@@ -57,13 +57,13 @@ export default async function LoginPage({
                   type="email" 
                   autoComplete="email" 
                   required 
-                  className="appearance-none relative block w-full pl-10 px-4 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E62020] focus:border-transparent transition-all sm:text-sm" 
-                  placeholder="name@example.com" 
+                  className="appearance-none relative block w-full pl-10 px-4 py-3 border border-gray-200 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#E62020] focus:border-transparent transition-all sm:text-sm" 
+                  placeholder="hanndi287@gmail.com" 
                 />
               </div>
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+              <label htmlFor="password" className="block text-xs font-semibold text-gray-700 mb-2">Password</label>
               <PasswordInput 
                 id="password" 
                 name="password" 

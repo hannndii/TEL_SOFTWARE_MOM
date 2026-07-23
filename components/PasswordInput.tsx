@@ -18,8 +18,8 @@ export default function PasswordInput({ id, name, placeholder, autoComplete, req
   return (
     <div className="relative">
       <label htmlFor={id} className="sr-only">{placeholder}</label>
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-        <Lock size={20} />
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+        <Lock size={18} strokeWidth={2} />
       </div>
       <input 
         id={id} 
