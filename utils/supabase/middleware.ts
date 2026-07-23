@@ -54,6 +54,11 @@ export async function updateSession(request: NextRequest) {
             getAll() { return [] },
             setAll() {},
           },
+          global: {
+            fetch: (url, options) => {
+              return fetch(url, { ...options, cache: 'no-store' })
+            }
+          }
         }
       )
       
@@ -75,7 +80,20 @@ export async function updateSession(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('error', 'Sesi Anda telah berakhir karena Anda masuk di terlalu banyak perangkat.')
-      return NextResponse.redirect(url)
+      
+      const redirectResponse = NextResponse.redirect(url)
+      
+      // Salin headers (terutama Set-Cookie untuk signOut) dari supabaseResponse
+      supabaseResponse.headers.forEach((value, key) => {
+        if (key.toLowerCase() === 'set-cookie') {
+          redirectResponse.headers.append(key, value)
+        }
+      })
+      
+      // Hapus cookie device_id agar mendapat ID baru jika login lagi
+      redirectResponse.cookies.delete('device_id')
+      
+      return redirectResponse
     }
   }
 
