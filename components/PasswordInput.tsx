@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Lock } from 'lucide-react'
 
 interface PasswordInputProps {
   id: string
@@ -18,6 +18,9 @@ export default function PasswordInput({ id, name, placeholder, autoComplete, req
   return (
     <div className="relative">
       <label htmlFor={id} className="sr-only">{placeholder}</label>
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+        <Lock size={20} />
+      </div>
       <input 
         id={id} 
         name={name} 
@@ -25,7 +28,7 @@ export default function PasswordInput({ id, name, placeholder, autoComplete, req
         autoComplete={autoComplete} 
         required={required} 
         minLength={minLength}
-        className="appearance-none relative block w-full px-4 py-3 pr-12 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all sm:text-sm" 
+        className="appearance-none relative block w-full pl-10 pr-12 py-3 border border-gray-300 placeholder-gray-400 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all sm:text-sm" 
         placeholder={placeholder} 
       />
       <button
