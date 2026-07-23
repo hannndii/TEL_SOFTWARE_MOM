@@ -13,26 +13,23 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         {/* Decorative lines / grid */}
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(0deg,rgba(255,255,255,0.1),rgba(255,255,255,0))] opacity-20"></div>
         
-        <div className="relative z-10 w-full max-w-lg flex flex-col items-center px-8">
-          <div className="w-full flex justify-center mb-2">
-            <div className="relative w-full max-w-[320px] aspect-square">
-              <Image 
-                src="/web-logo-signinup.png" 
-                alt="myTELMOM" 
-                fill 
-                className="object-contain"
-                priority
-              />
-            </div>
-          </div>
+        <div className="relative z-10 w-full max-w-sm flex flex-col items-start px-4">
+          <Image 
+            src="/web-logo-signinup.png" 
+            alt="myTELMOM" 
+            width={500}
+            height={500}
+            className="w-full h-auto mb-2"
+            priority
+          />
           
-          <div className="text-center">
+          <div className="text-left w-full mt-2">
             <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4 leading-tight">
               Smart Meeting Minutes,<br />
               Simplified.
             </h3>
             
-            <p className="text-gray-400 text-base sm:text-lg leading-relaxed max-w-md mx-auto">
+            <p className="text-gray-400 text-base sm:text-[17px] leading-relaxed">
               Capture, summarize, and manage your meeting<br />
               minutes effortlessly in one intelligent platform.
             </p>
