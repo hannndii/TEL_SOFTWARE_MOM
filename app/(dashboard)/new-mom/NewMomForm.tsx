@@ -26,7 +26,7 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
     contentFiles: [] as File[],
   })
 
-  const isPremium = userTier === 'premium'
+  const isPremium = true;
 
   // Forms
   const { register: registerMeta, handleSubmit: handleMetaSubmit, formState: { errors: metaErrors } } = useForm({
@@ -226,12 +226,7 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
             
             {contentErrors.contentFiles && <p className="text-red-500 text-xs mt-1 text-center">{contentErrors.contentFiles.message as string}</p>}
 
-            {!isPremium && (
-              <div className="bg-blue-50 text-blue-800 p-4 rounded-lg flex gap-3 text-sm border border-blue-100">
-                <Info className="shrink-0" size={20} />
-                <p>Free tier allows text formats only. <a href="/settings" className="font-bold underline">Upgrade to Premium</a> to support audio uploads.</p>
-              </div>
-            )}
+
 
             <div className="pt-6 flex justify-between">
               <button type="button" onClick={() => setStep(1)} className="text-gray-600 font-medium hover:text-gray-900 px-4 py-2">

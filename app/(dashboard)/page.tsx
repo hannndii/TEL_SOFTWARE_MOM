@@ -20,6 +20,18 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
     .eq('id', user.id)
     .single();
 
+  const now = new Date();
+  const utc7Time = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+  utc7Time.setUTCHours(0, 0, 0, 0);
+  const startOfToday = new Date(utc7Time.getTime() - (7 * 60 * 60 * 1000));
+
+  const { count: generatedTodayCount } = await supabase
+    .from('meeting_mom')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('status', 'exported')
+    .gte('updated_at', startOfToday.toISOString());
+
   const { count: totalMom } = await supabase
     .from('meeting_mom')
     .select('*', { count: 'exact', head: true })
@@ -49,7 +61,7 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
     .order('updated_at', { ascending: false })
     .limit(limitCount);
 
-  const isPremium = userProfile?.tier === 'premium';
+
 
   return (
     <div className="w-full">
@@ -100,15 +112,11 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
               <BarChart3 size={28} />
             </div>
             <div>
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Daily Quota</p>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Generated Today</p>
               <div className="flex items-baseline gap-2 mt-1">
-                {isPremium ? (
-                   <p className="text-3xl font-extrabold text-gray-900">Unlimited</p>
-                ) : (
-                   <p className="text-3xl font-extrabold text-gray-900">{userProfile?.daily_quota_left || 0} <span className="text-lg text-gray-400 font-medium">/ 3</span></p>
-                )}
+                <p className="text-3xl font-extrabold text-gray-900">{generatedTodayCount || 0} <span className="text-lg text-gray-400 font-medium">/ 50</span></p>
               </div>
-              <p className="text-xs text-green-600 font-semibold mt-1">{isPremium ? 'Premium Tier' : 'Free Tier Active'}</p>
+              <p className="text-xs text-green-600 font-semibold mt-1">Internal Account</p>
             </div>
           </div>
         </div>

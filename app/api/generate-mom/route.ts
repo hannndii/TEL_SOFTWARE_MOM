@@ -44,11 +44,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 })
     }
 
-    const isPremium = userProfile.tier === 'premium'
+    // 2. Validate Quota (Internal Limit based on actual generations today)
+    const now = new Date();
+    const utc7Time = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+    utc7Time.setUTCHours(0, 0, 0, 0);
+    const startOfToday = new Date(utc7Time.getTime() - (7 * 60 * 60 * 1000));
+    
+    const { count: generatedTodayCount } = await supabase
+      .from('meeting_mom')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('status', 'exported')
+      .gte('updated_at', startOfToday.toISOString());
 
-    // 2. Validate Quota for Free Tier
-    if (!isPremium && userProfile.daily_quota_left <= 0) {
-      return NextResponse.json({ error: 'Daily quota exceeded. Please upgrade to Premium.' }, { status: 403 })
+    if ((generatedTodayCount || 0) >= 50) {
+      return NextResponse.json({ error: 'You have reached the daily limit (50) for document generation to prevent excessive use. Please try again tomorrow.' }, { status: 403 })
     }
 
     // 3. Download ALL raw content files from Storage
@@ -208,29 +218,7 @@ Please analyze the attached meeting transcript document(s).
       return NextResponse.json({ error: 'Failed to update MoM record' }, { status: 500 })
     }
 
-    // 6. Decrement Quota (if free tier)
-    if (!isPremium) {
-      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-      if (serviceRoleKey) {
-        const supabaseAdmin = createAdminClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          serviceRoleKey,
-          {
-            auth: {
-              autoRefreshToken: false,
-              persistSession: false
-            }
-          }
-        )
-        
-        await supabaseAdmin
-          .from('users')
-          .update({ daily_quota_left: userProfile.daily_quota_left - 1 })
-          .eq('id', user.id)
-      } else {
-         console.error("SUPABASE_SERVICE_ROLE_KEY not found. Quota not decremented.");
-      }
-    }
+    // 6. Quota Decrement Removed (Handled dynamically via count query)
 
     // 7. Delete Raw Files from Storage
     if (rawFilePaths.length > 0) {

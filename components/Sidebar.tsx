@@ -21,7 +21,7 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free", userNa
   
   const initial = userName ? userName.charAt(0).toUpperCase() : userEmail.charAt(0).toUpperCase();
   const displayName = userName || userEmail.split('@')[0];
-  const displayTier = userTier === 'premium' ? 'Premium Tier' : 'Free Tier';
+  const displayTier = 'Internal User';
 
   // Helper function to check if link is active
   const isActive = (path: string) => {
@@ -104,12 +104,7 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free", userNa
               >
                 Security
               </Link>
-              <Link 
-                href="/settings?tab=billing" 
-                className={`text-sm transition-all flex items-center ${pathname === '/settings' && currentTab === 'billing' ? 'text-white font-semibold -ml-[2px] border-l-2 border-telkom-red pl-3' : 'text-slate-400 hover:text-white pl-3'}`}
-              >
-                Billing
-              </Link>
+
             </div>
           </div>
         </div>
