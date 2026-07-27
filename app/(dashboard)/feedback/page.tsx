@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { submitFeedback } from './actions'
-import { CheckCircle2, AlertCircle } from 'lucide-react'
+import { CheckCircle2, AlertCircle, PartyPopper } from 'lucide-react'
+import confetti from 'canvas-confetti'
 
 export default function FeedbackPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -30,22 +31,48 @@ export default function FeedbackPage() {
     }
   }
 
+  useEffect(() => {
+    if (success) {
+      // Trigger confetti animation
+      const duration = 3 * 1000;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+      const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+
+      const interval: any = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+      }, 250);
+    }
+  }, [success]);
+
   if (success) {
     return (
-      <div className="w-full max-w-2xl mx-auto mt-12 bg-white p-12 rounded-2xl shadow-sm border border-gray-100 text-center">
-        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 size={40} className="text-green-500" />
+      <div className="w-full max-w-2xl mx-auto mt-12 bg-white p-12 rounded-2xl shadow-xl border border-gray-100 text-center relative overflow-hidden transform transition-all duration-500 scale-100 opacity-100">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50/20 z-0"></div>
+        <div className="relative z-10">
+          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner animate-bounce">
+            <PartyPopper size={48} className="text-green-600" />
+          </div>
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Terima Kasih Banyak! 🎉</h2>
+          <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+            Masukan Anda sangat berharga bagi kami. Setiap opini Anda membantu kami merancang <b>TELMOM</b> menjadi jauh lebih baik untuk produktivitas tim internal kita!
+          </p>
+          <button 
+            onClick={() => setSuccess(false)}
+            className="bg-gradient-to-r from-telkom-navy to-blue-800 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+          >
+            Kembali ke Form
+          </button>
         </div>
-        <h2 className="text-3xl font-bold text-gray-900 mb-4">Thank You!</h2>
-        <p className="text-gray-600 text-lg mb-8">
-          Your feedback is incredibly valuable to us and will help shape the future of TELMOM.
-        </p>
-        <button 
-          onClick={() => setSuccess(false)}
-          className="bg-telkom-navy text-white px-8 py-3 rounded-xl font-medium hover:bg-blue-900 transition-colors"
-        >
-          Submit Another Response
-        </button>
       </div>
     )
   }
