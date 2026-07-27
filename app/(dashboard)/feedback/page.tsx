@@ -56,19 +56,18 @@ export default function FeedbackPage() {
 
   if (success) {
     return (
-      <div className="w-full max-w-2xl mx-auto mt-12 bg-white p-12 rounded-2xl shadow-xl border border-gray-100 text-center relative overflow-hidden transform transition-all duration-500 scale-100 opacity-100">
-        <div className="absolute inset-0 bg-gradient-to-br from-green-50 to-emerald-50/20 z-0"></div>
+      <div className="w-full max-w-2xl mx-auto mt-12 bg-white p-12 rounded-2xl shadow-sm border border-gray-200 text-center relative overflow-hidden">
         <div className="relative z-10">
-          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner animate-bounce">
-            <PartyPopper size={48} className="text-green-600" />
+          <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 size={40} className="text-green-600" />
           </div>
-          <h2 className="text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">Terima Kasih Banyak! 🎉</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-4 tracking-tight">Terima Kasih Banyak!</h2>
           <p className="text-gray-600 text-lg mb-8 leading-relaxed">
-            Masukan Anda sangat berharga bagi kami. Setiap opini Anda membantu kami merancang <b>TELMOM</b> menjadi jauh lebih baik untuk produktivitas tim internal kita!
+            Masukan Anda sangat berharga bagi kami. Setiap opini Anda membantu kami merancang <b>TELMOM</b> menjadi jauh lebih baik untuk produktivitas tim internal kita.
           </p>
           <button 
             onClick={() => setSuccess(false)}
-            className="bg-gradient-to-r from-telkom-navy to-blue-800 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
+            className="bg-blue-600 text-white px-8 py-3 rounded-md font-medium hover:bg-blue-700 transition-colors shadow-sm"
           >
             Kembali ke Form
           </button>
@@ -97,14 +96,14 @@ export default function FeedbackPage() {
 
   return (
     <div className="w-full max-w-3xl mx-auto pb-12">
-      <div className="bg-gradient-to-r from-telkom-navy to-[#1e2840] p-10 rounded-t-3xl text-white">
-        <h1 className="text-3xl font-bold mb-3">Usability Testing Feedback</h1>
-        <p className="text-gray-300 text-sm">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Usability Testing Feedback</h1>
+        <p className="text-gray-600 text-sm">
           Please share your honest experience using the TELMOM application. Your feedback helps us build a better tool for everyone.
         </p>
       </div>
 
-      <div className="bg-white p-10 rounded-b-3xl shadow-sm border border-gray-100">
+      <div className="bg-white p-8 md:p-10 rounded-xl shadow-sm border border-gray-200">
         {error && (
           <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start gap-3 text-red-600">
             <AlertCircle size={20} className="mt-0.5 shrink-0" />
@@ -116,25 +115,25 @@ export default function FeedbackPage() {
           
           {/* Section 1: Basic Info */}
           <section>
-            <h2 className="text-xl font-bold text-gray-900 border-b pb-2 mb-6">1. Basic Information</h2>
+            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 mb-6">1. Basic Information</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-                <input type="text" name="name" required className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all" />
+                <label className="block text-sm font-semibold text-gray-800 mb-2">Full Name</label>
+                <input type="text" name="name" required className="w-full px-4 py-2.5 rounded-md border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm text-sm" />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Department / Division</label>
-                <input type="text" name="department" required className="w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all" />
+                <label className="block text-sm font-semibold text-gray-800 mb-2">Department / Division</label>
+                <input type="text" name="department" required className="w-full px-4 py-2.5 rounded-md border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm text-sm" />
               </div>
             </div>
             
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">How often do you create Meeting Minutes in a week?</label>
-              <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-3">How often do you create Meeting Minutes in a week?</label>
+              <div className="space-y-3">
                 {['1 - 2 times', '3 - 5 times', 'More than 5 times', 'Rarely / Never'].map(opt => (
-                  <label key={opt} className="flex items-center gap-3 cursor-pointer">
-                    <input type="radio" name="frequency" value={opt} required className="text-telkom-red focus:ring-telkom-red" />
-                    <span className="text-sm text-gray-700">{opt}</span>
+                  <label key={opt} className="flex items-center gap-3 cursor-pointer group">
+                    <input type="radio" name="frequency" value={opt} required className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300" />
+                    <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">{opt}</span>
                   </label>
                 ))}
               </div>
@@ -143,7 +142,7 @@ export default function FeedbackPage() {
 
           {/* Section 2: UI */}
           <section>
-            <h2 className="text-xl font-bold text-gray-900 border-b pb-2 mb-6">2. User Interface (UI) Experience</h2>
+            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 mb-6">2. User Interface (UI) Experience</h2>
             {renderScale1To5("ui_login", "How would you rate the visual appearance of the Login and Registration pages?")}
             {renderScale1To5("ui_dashboard", "Are the colors, text, and layout on the Dashboard easy to read and comfortable for the eyes?")}
             {renderScale1To5("ui_navigation", "How easy was it to find the 'Create New MoM' menu or other navigation items?")}
@@ -151,22 +150,22 @@ export default function FeedbackPage() {
 
           {/* Section 3: UX */}
           <section>
-            <h2 className="text-xl font-bold text-gray-900 border-b pb-2 mb-6">3. User Experience (UX)</h2>
+            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 mb-6">3. User Experience (UX)</h2>
             {renderScale1To5("ux_upload", "How easy was the process of uploading files (audio/documents) on the Create MoM form?")}
             {renderScale1To5("ux_generate", "Did the 'Generate' process run smoothly and was it easy to understand?")}
             {renderScale1To5("ux_accuracy", "How would you rate the accuracy of the generated meeting minutes (MoM) summaries?")}
             
             <div className="mt-8">
-              <label className="block text-sm font-semibold text-gray-700 mb-3">Is the 'Generated Today / Quota' information on the Dashboard clear to you?</label>
-              <div className="space-y-2">
+              <label className="block text-sm font-semibold text-gray-800 mb-3">Is the 'Generated Today / Quota' information on the Dashboard clear to you?</label>
+              <div className="space-y-3">
                 {[
                   'Yes, very clear', 
                   'Somewhat clear, but needs adjustments', 
                   'Not clear at all'
                 ].map(opt => (
-                  <label key={opt} className="flex items-center gap-3 cursor-pointer">
-                    <input type="radio" name="ux_quota_clarity" value={opt} required className="text-telkom-red focus:ring-telkom-red" />
-                    <span className="text-sm text-gray-700">{opt}</span>
+                  <label key={opt} className="flex items-center gap-3 cursor-pointer group">
+                    <input type="radio" name="ux_quota_clarity" value={opt} required className="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300" />
+                    <span className="text-sm text-gray-700 group-hover:text-gray-900 transition-colors">{opt}</span>
                   </label>
                 ))}
               </div>
@@ -175,22 +174,22 @@ export default function FeedbackPage() {
 
           {/* Section 4: Qualitative */}
           <section>
-            <h2 className="text-xl font-bold text-gray-900 border-b pb-2 mb-6">4. Feedback & Suggestions</h2>
+            <h2 className="text-lg font-bold text-gray-900 border-b border-gray-100 pb-3 mb-6">4. Feedback & Suggestions</h2>
             
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">What feature do you like the most about the TELMOM application?</label>
-                <textarea name="feedback_favorite" required rows={3} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all"></textarea>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">What feature do you like the most about the TELMOM application?</label>
+                <textarea name="feedback_favorite" required rows={3} className="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm text-sm"></textarea>
               </div>
               
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Did you encounter any issues (errors/bugs) while using the application? If yes, please explain where.</label>
-                <textarea name="feedback_bugs" rows={3} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all"></textarea>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">Did you encounter any issues (errors/bugs) while using the application? If yes, please explain where.</label>
+                <textarea name="feedback_bugs" rows={3} className="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm text-sm"></textarea>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Are there any additional features or improvements you hope to see in future updates?</label>
-                <textarea name="feedback_improvements" rows={3} className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-telkom-red focus:border-transparent transition-all"></textarea>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">Are there any additional features or improvements you hope to see in future updates?</label>
+                <textarea name="feedback_improvements" rows={3} className="w-full px-4 py-3 rounded-md border border-gray-300 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm text-sm"></textarea>
               </div>
 
               <div>
@@ -213,11 +212,11 @@ export default function FeedbackPage() {
             </div>
           </section>
 
-          <div className="pt-6 border-t">
+          <div className="pt-6 border-t border-gray-100 flex justify-end">
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="w-full sm:w-auto bg-telkom-red text-white px-10 py-3.5 rounded-xl font-bold text-lg hover:bg-red-700 focus:ring-4 focus:ring-red-200 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto bg-blue-600 text-white px-8 py-2.5 rounded-md font-medium text-sm hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Submitting Feedback...' : 'Submit Feedback'}
             </button>
