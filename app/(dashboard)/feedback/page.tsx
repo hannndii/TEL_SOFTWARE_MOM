@@ -97,7 +97,7 @@ export default function FeedbackPage() {
   return (
     <div className="w-full max-w-3xl mx-auto pb-12">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Usability Testing Feedback</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">User Feedback</h1>
         <p className="text-gray-600 text-sm">
           Please share your honest experience using the TELMOM application. Your feedback helps us build a better tool for everyone.
         </p>
