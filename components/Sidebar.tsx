@@ -71,6 +71,12 @@ export default function Sidebar({ userEmail = "Guest", userTier = "free", userNa
           <FileText size={20} className={getIconClasses('/new-mom')} />
           <span className={getTextClasses('/new-mom')}>Create MoM</span>
         </Link>
+        <Link href="/feedback" className={getLinkClasses('/feedback')}>
+          <svg className={`w-5 h-5 ${getIconClasses('/feedback')}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+          <span className={getTextClasses('/feedback')}>Give Feedback</span>
+        </Link>
         
         {/* Settings Dropdown */}
         <div>
