@@ -77,7 +77,11 @@ export async function updatePassword(formData: FormData) {
     return { error: error.message }
   }
 
-  return { success: true }
+  // Sign out automatically after password update
+  await supabase.auth.signOut()
+  
+  // Redirect to login page
+  redirect('/login?message=Password%20berhasil%20diubah.%20Silakan%20login%20kembali.')
 }
 
 export async function deleteAccount() {
