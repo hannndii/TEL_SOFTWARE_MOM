@@ -15,26 +15,39 @@ export async function login(formData: FormData) {
     password: formData.get('password') as string,
   }
 
-  // 1. Verifikasi Email via Admin Client (Supabase hides this by default for security)
-  const { data: userExists, error: emailError } = await supabaseAdmin
-    .from('users')
-    .select('id')
-    .eq('email', data.email)
-    .single()
-
-  if (!userExists || emailError) {
-    redirect('/login?error=' + encodeURIComponent('Alamat email belum terdaftar.'))
-  }
+  // 1. We remove the manual public.users check here because it causes state mismatch
+  // if a user exists in auth.users but not in public.users (e.g. from old data).
+  // We will let Supabase handle the authentication directly.
 
   // 2. Sign In
   const { data: authData, error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    redirect('/login?error=' + encodeURIComponent(error.message))
+    let errorMessage = error.message
+    if (errorMessage === 'Invalid login credentials') {
+      errorMessage = 'Email atau kata sandi yang Anda masukkan salah.'
+    }
+    redirect('/login?error=' + encodeURIComponent(errorMessage))
   }
 
-  // 3. Logic Pembatasan 2 Device
+  // 3. Logic Pembatasan 2 Device & Sinkronisasi User
   if (authData?.user) {
+    // Sinkronisasi data user: Pastikan user ada di public.users (backfill jika hilang)
+    const { data: userExistsInPublic } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('id', authData.user.id)
+      .single()
+      
+    if (!userExistsInPublic) {
+      await supabaseAdmin.from('users').insert({
+        id: authData.user.id,
+        email: authData.user.email,
+        tier: 'internal',
+        daily_quota_left: 50
+      })
+    }
+
     const cookieStore = await cookies()
     let deviceId = cookieStore.get('device_id')?.value
 
