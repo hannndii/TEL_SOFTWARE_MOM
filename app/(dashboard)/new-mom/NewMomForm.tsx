@@ -46,11 +46,27 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
     const newFiles = Array.from(e.target.files || []);
     if (!newFiles.length) return;
     
-    // Append new files, avoiding duplicates by name, cap at 5
+    // 1. Cek batasan ukuran file (Max 20MB)
+    const MAX_SIZE = 20 * 1024 * 1024;
+    const oversizedFiles = newFiles.filter(f => f.size > MAX_SIZE);
+    if (oversizedFiles.length > 0) {
+      alert(`Gagal mengunggah: File melebihi batas ukuran maksimal 20MB (${oversizedFiles.map(f => f.name).join(', ')}).`);
+      e.target.value = '';
+      return;
+    }
+    
+    // 2. Filter duplikat
     const existingFileNames = new Set(contentFiles.map(f => f.name));
     const uniqueNewFiles = newFiles.filter(f => !existingFileNames.has(f.name));
-    const combinedFiles = [...contentFiles, ...uniqueNewFiles].slice(0, 5);
     
+    // 3. Cek batasan jumlah file (Max 5)
+    if (contentFiles.length + uniqueNewFiles.length > 5) {
+      alert("Gagal mengunggah: Anda telah melebihi batas maksimal 5 file.");
+      e.target.value = '';
+      return;
+    }
+    
+    const combinedFiles = [...contentFiles, ...uniqueNewFiles];
     setContentValue('contentFiles', combinedFiles, { shouldValidate: true });
     
     // Reset input so the same file can be selected again if removed
