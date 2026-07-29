@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { metadataSchema, contentSchema } from '@/utils/formSchemas'
 import { submitMomDraft } from './actions'
-import { CheckCircle2, UploadCloud, FileText, AlertCircle, Loader2, Info } from 'lucide-react'
+import { CheckCircle2, UploadCloud, FileText, AlertCircle, Loader2, Info, X } from 'lucide-react'
 
 export default function NewMomForm({ userTier }: { userTier: string }) {
   const router = useRouter()
@@ -40,7 +40,27 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
   const { register: registerContent, handleSubmit: handleContentSubmit, setValue: setContentValue, watch: watchContent, formState: { errors: contentErrors } } = useForm({
     resolver: zodResolver(contentSchema)
   })
-  const contentFiles = watchContent('contentFiles')
+  const contentFiles = (watchContent('contentFiles') || []) as File[]
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newFiles = Array.from(e.target.files || []);
+    if (!newFiles.length) return;
+    
+    // Append new files, avoiding duplicates by name, cap at 5
+    const existingFileNames = new Set(contentFiles.map(f => f.name));
+    const uniqueNewFiles = newFiles.filter(f => !existingFileNames.has(f.name));
+    const combinedFiles = [...contentFiles, ...uniqueNewFiles].slice(0, 5);
+    
+    setContentValue('contentFiles', combinedFiles, { shouldValidate: true });
+    
+    // Reset input so the same file can be selected again if removed
+    e.target.value = '';
+  }
+
+  const removeFile = (indexToRemove: number) => {
+    const updatedFiles = contentFiles.filter((_, i) => i !== indexToRemove);
+    setContentValue('contentFiles', updatedFiles, { shouldValidate: true });
+  }
 
   // Step Handlers
   const onMetaSubmit = (data: any) => {
@@ -219,17 +239,17 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
               </p>
             </div>
 
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:bg-gray-50 transition-colors relative">
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:bg-gray-50 transition-colors relative">
               <input 
                 type="file" 
                 multiple
                 accept={isPremium ? ".txt,.docx,.mp3,.wav,.m4a" : ".txt,.docx"}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                {...registerContent('contentFiles')}
+                onChange={handleFileSelect}
               />
-              <UploadCloud className="mx-auto text-gray-400 mb-4" size={48} />
+              <UploadCloud className="mx-auto text-gray-400 mb-2" size={36} />
               <p className="text-sm font-medium text-gray-900 mb-1">
-                {contentFiles && contentFiles.length > 0 ? 'Click or drag to replace files' : 'Click to upload or drag and drop'}
+                Click to upload or drag and drop
               </p>
               <p className="text-xs text-gray-500">
                 Max 5 files. {isPremium ? 'TXT, DOCX, MP3, WAV up to 20MB.' : 'TXT, DOCX up to 20MB each.'}
@@ -237,20 +257,23 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
             </div>
             
             {contentFiles && contentFiles.length > 0 && (
-              <div className="mt-6 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <p className="text-sm font-bold text-gray-700">Selected Files ({contentFiles.length}/5):</p>
-                <div className="flex flex-col gap-2.5">
-                  {Array.from(contentFiles).map((f: any, i) => (
-                    <div key={i} className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-200 rounded-xl shadow-sm hover:border-telkom-red/30 transition-colors">
-                      <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="p-2 bg-white rounded-lg shadow-sm border border-gray-100">
-                          <FileText className="text-telkom-red flex-shrink-0" size={20} />
-                        </div>
-                        <span className="text-sm font-semibold text-gray-700 truncate">{f.name}</span>
+              <div className="mt-4 space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <p className="text-xs font-bold text-gray-700">Selected Files ({contentFiles.length}/5):</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {contentFiles.map((f: any, i: number) => (
+                    <div key={i} className="flex items-center justify-between p-2 bg-gray-50 border border-gray-200 rounded-lg shadow-sm hover:border-telkom-red/30 transition-colors">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <FileText className="text-telkom-red flex-shrink-0" size={16} />
+                        <span className="text-xs font-semibold text-gray-700 truncate" title={f.name}>{f.name}</span>
                       </div>
-                      <span className="text-xs font-bold text-gray-500 whitespace-nowrap ml-4 bg-gray-200/70 px-2.5 py-1 rounded-md">
-                        {(f.size / 1024 / 1024).toFixed(2)} MB
-                      </span>
+                      <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                        <span className="text-[10px] font-bold text-gray-500 bg-gray-200/70 px-1.5 py-0.5 rounded">
+                          {(f.size / 1024 / 1024).toFixed(2)} MB
+                        </span>
+                        <button type="button" onClick={() => removeFile(i)} className="text-gray-400 hover:text-red-500 transition-colors" title="Remove file">
+                          <X size={14} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
