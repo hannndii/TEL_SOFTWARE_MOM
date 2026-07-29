@@ -69,7 +69,6 @@ export async function updatePassword(formData: FormData) {
   
   const { error } = await supabase.auth.updateUser({
     password: password,
-    // @ts-expect-error: Supabase v2.102.0+ supports current_password but types might be outdated
     current_password: currentPassword
   })
 

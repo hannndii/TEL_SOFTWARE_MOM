@@ -14,8 +14,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "myTELMOM",
-  description: "AI-Powered Meeting Minutes Generator",
+  title: "myTELMOM - AI Meeting Minutes Generator",
+  description: "AI-Powered Meeting Minutes Generator for Corporate Professionals. Record, transcribe, and summarize your meetings automatically.",
+  keywords: ["meeting minutes", "AI meeting", "transcription", "MoM generator", "TELMOM", "notulen AI"],
+  authors: [{ name: "myTELMOM Team" }],
+  openGraph: {
+    title: "myTELMOM - AI Meeting Minutes",
+    description: "AI-Powered Meeting Minutes Generator for Corporate Professionals.",
+    url: "https://tel-software-mom.vercel.app",
+    siteName: "myTELMOM",
+    images: [
+      {
+        url: "/og-image.jpg", // A placeholder for OG image
+        width: 1200,
+        height: 630,
+      }
+    ],
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "myTELMOM - AI Meeting Minutes",
+    description: "AI-Powered Meeting Minutes Generator for Corporate Professionals.",
+    images: ["/og-image.jpg"],
+  }
 };
 
 export default function RootLayout({

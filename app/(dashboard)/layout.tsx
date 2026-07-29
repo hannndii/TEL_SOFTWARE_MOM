@@ -27,7 +27,6 @@ export default async function DashboardLayout({
     <div className="flex h-screen w-full overflow-hidden bg-gray-50/50">
       <Sidebar 
         userEmail={user.email} 
-        userTier={userProfile?.tier || 'free'} 
         userName={userProfile?.full_name}
         userAvatar={userProfile?.avatar_url}
       />
