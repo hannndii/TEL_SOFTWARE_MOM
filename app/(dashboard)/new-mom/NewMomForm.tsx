@@ -228,25 +228,34 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
                 {...registerContent('contentFiles')}
               />
               <UploadCloud className="mx-auto text-gray-400 mb-4" size={48} />
-              
-              {contentFiles && contentFiles.length > 0 ? (
-                <div className="space-y-2">
-                  <p className="text-sm font-medium text-telkom-navy">{contentFiles.length} file(s) selected:</p>
-                  <ul className="text-xs text-gray-500 inline-block text-left list-disc list-inside">
-                    {Array.from(contentFiles).map((f: any, i) => (
-                      <li key={i}>{f.name} ({(f.size / 1024 / 1024).toFixed(2)} MB)</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : (
-                <>
-                  <p className="text-sm font-medium text-gray-900 mb-1">Click to upload or drag and drop</p>
-                  <p className="text-xs text-gray-500">
-                    Max 5 files. {isPremium ? 'TXT, DOCX, MP3, WAV up to 20MB.' : 'TXT, DOCX up to 20MB each.'}
-                  </p>
-                </>
-              )}
+              <p className="text-sm font-medium text-gray-900 mb-1">
+                {contentFiles && contentFiles.length > 0 ? 'Click or drag to replace files' : 'Click to upload or drag and drop'}
+              </p>
+              <p className="text-xs text-gray-500">
+                Max 5 files. {isPremium ? 'TXT, DOCX, MP3, WAV up to 20MB.' : 'TXT, DOCX up to 20MB each.'}
+              </p>
             </div>
+            
+            {contentFiles && contentFiles.length > 0 && (
+              <div className="mt-6 space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <p className="text-sm font-bold text-gray-700">Selected Files ({contentFiles.length}/5):</p>
+                <div className="flex flex-col gap-2.5">
+                  {Array.from(contentFiles).map((f: any, i) => (
+                    <div key={i} className="flex items-center justify-between p-3.5 bg-gray-50 border border-gray-200 rounded-xl shadow-sm hover:border-telkom-red/30 transition-colors">
+                      <div className="flex items-center gap-3 overflow-hidden">
+                        <div className="p-2 bg-white rounded-lg shadow-sm border border-gray-100">
+                          <FileText className="text-telkom-red flex-shrink-0" size={20} />
+                        </div>
+                        <span className="text-sm font-semibold text-gray-700 truncate">{f.name}</span>
+                      </div>
+                      <span className="text-xs font-bold text-gray-500 whitespace-nowrap ml-4 bg-gray-200/70 px-2.5 py-1 rounded-md">
+                        {(f.size / 1024 / 1024).toFixed(2)} MB
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             
             {contentErrors.contentFiles && <p className="text-red-500 text-xs mt-1 text-center">{contentErrors.contentFiles.message as string}</p>}
 
