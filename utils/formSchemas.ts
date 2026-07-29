@@ -7,8 +7,17 @@ export const metadataSchema = z.object({
   time: z.string().min(1, "Time is required"),
   location: z.string().min(2, "Location or Venue is required"),
   type_of_meeting: z.array(z.string()).min(1, "Please select at least one meeting type"),
+  other_meeting_type: z.string().optional(),
   attendees: z.string().min(2, "Attendees are required"),
   facilitator: z.string().min(2, "Facilitator name is required"),
+}).superRefine((data, ctx) => {
+  if (data.type_of_meeting.includes("Other") && (!data.other_meeting_type || data.other_meeting_type.trim() === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Please specify the other meeting type",
+      path: ["other_meeting_type"],
+    });
+  }
 });
 
 export type MetadataFormValues = z.infer<typeof metadataSchema>;

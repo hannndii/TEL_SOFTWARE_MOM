@@ -20,6 +20,7 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
     meeting_date: '',
     time: '',
     type_of_meeting: [] as string[],
+    other_meeting_type: '',
     location: '',
     attendees: '',
     facilitator: '',
@@ -29,10 +30,12 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
   const isPremium = true;
 
   // Forms
-  const { register: registerMeta, handleSubmit: handleMetaSubmit, formState: { errors: metaErrors } } = useForm({
+  const { register: registerMeta, handleSubmit: handleMetaSubmit, watch: watchMeta, formState: { errors: metaErrors } } = useForm({
     resolver: zodResolver(metadataSchema),
-    defaultValues: { agenda: formData.agenda, meeting_date: formData.meeting_date, time: formData.time, type_of_meeting: formData.type_of_meeting, location: formData.location, attendees: formData.attendees, facilitator: formData.facilitator }
+    defaultValues: { agenda: formData.agenda, meeting_date: formData.meeting_date, time: formData.time, type_of_meeting: formData.type_of_meeting, other_meeting_type: formData.other_meeting_type, location: formData.location, attendees: formData.attendees, facilitator: formData.facilitator }
   })
+  const selectedMeetingTypes = watchMeta('type_of_meeting') || [];
+  const showOtherInput = selectedMeetingTypes.includes('Other');
 
   const { register: registerContent, handleSubmit: handleContentSubmit, setValue: setContentValue, watch: watchContent, formState: { errors: contentErrors } } = useForm({
     resolver: zodResolver(contentSchema)
@@ -56,7 +59,16 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
       submitData.append('agenda', finalData.agenda)
       submitData.append('meeting_date', finalData.meeting_date)
       submitData.append('time', finalData.time)
-      submitData.append('type_of_meeting', JSON.stringify(finalData.type_of_meeting))
+      
+      let finalTypes = [...finalData.type_of_meeting]
+      if (finalTypes.includes('Other')) {
+        finalTypes = finalTypes.filter(t => t !== 'Other')
+        if (finalData.other_meeting_type) {
+          finalTypes.push(finalData.other_meeting_type)
+        }
+      }
+      submitData.append('type_of_meeting', JSON.stringify(finalTypes))
+      
       submitData.append('location', finalData.location)
       submitData.append('attendees', finalData.attendees)
       submitData.append('facilitator', finalData.facilitator)
@@ -155,6 +167,18 @@ export default function NewMomForm({ userTier }: { userTier: string }) {
                   ))}
                 </div>
                 {metaErrors.type_of_meeting && <p className="text-red-500 text-xs mt-1">{metaErrors.type_of_meeting.message as string}</p>}
+                
+                {showOtherInput && (
+                  <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Please specify the meeting type</label>
+                    <input 
+                      {...registerMeta('other_meeting_type')} 
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkom-red focus:border-transparent outline-none transition-all" 
+                      placeholder="e.g. Brainstorming, Evaluation" 
+                    />
+                    {metaErrors.other_meeting_type && <p className="text-red-500 text-xs mt-1">{metaErrors.other_meeting_type.message as string}</p>}
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">
