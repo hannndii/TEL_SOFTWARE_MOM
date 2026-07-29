@@ -1,4 +1,4 @@
-import { FileText, Clock, BarChart3, Plus, ChevronRight, FileArchive, ArrowRight } from "lucide-react";
+import { FileText, Clock, BarChart3, Plus, ChevronRight, ArrowRight } from "lucide-react";
 import Link from 'next/link'
 import DashboardTableControls from './DashboardTableControls'
 import { createClient } from "@/utils/supabase/server";
@@ -14,11 +14,7 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
 
   if (!user) return null;
 
-  const { data: userProfile } = await supabase
-    .from('users')
-    .select('tier, daily_quota_left')
-    .eq('id', user.id)
-    .single();
+
 
   const now = new Date();
   const utc7Time = new Date(now.getTime() + (7 * 60 * 60 * 1000));
@@ -210,7 +206,7 @@ export default async function Dashboard(props: { searchParams?: Promise<{ search
                 <FileText size={32} className="text-gray-300" />
               </div>
               <h3 className="text-lg font-bold text-gray-900">No meeting minutes yet</h3>
-              <p className="text-gray-500 mt-2 text-sm max-w-sm">You haven't generated any MoM documents. Create your first document to see it appear here.</p>
+              <p className="text-gray-500 mt-2 text-sm max-w-sm">You haven&apos;t generated any MoM documents. Create your first document to see it appear here.</p>
               <Link 
                 href="/new-mom" 
                 className="mt-6 bg-telkom-navy hover:bg-blue-900 text-white px-6 py-2.5 rounded-md font-medium transition-colors shadow-sm"

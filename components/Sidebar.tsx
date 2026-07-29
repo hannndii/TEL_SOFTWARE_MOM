@@ -9,12 +9,11 @@ import { usePathname, useSearchParams } from "next/navigation";
 
 interface SidebarProps {
   userEmail?: string;
-  userTier?: string;
   userName?: string;
   userAvatar?: string;
 }
 
-export default function Sidebar({ userEmail = "Guest", userTier = "free", userName, userAvatar }: SidebarProps) {
+export default function Sidebar({ userEmail = "Guest", userName, userAvatar }: SidebarProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams?.get('tab') || 'profile';

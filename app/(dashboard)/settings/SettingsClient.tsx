@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useTransition, useRef } from 'react'
-import { User, Shield, CreditCard, Loader2, CheckCircle2, AlertTriangle, Key, Copy, Check, Camera, Edit2, Save, X, Crown } from 'lucide-react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { User, Shield, Loader2, Key, Copy, Check, Camera, Edit2, Save, X, AlertTriangle } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import { updatePassword, deleteAccount, updateProfile } from './actions'
 import { createClient } from '@/utils/supabase/client'
 import PasswordInput from '@/components/PasswordInput'
@@ -13,8 +13,6 @@ type Tab = 'profile' | 'security'
 export default function SettingsClient({ userProfile, userEmail }: { userProfile: any, userEmail: string }) {
   const searchParams = useSearchParams()
   const activeTab = (searchParams.get('tab') as Tab) || 'profile'
-  const [isUpgrading, setIsUpgrading] = useState(false)
-  const [success, setSuccess] = useState(false)
   const [copied, setCopied] = useState(false)
   
   // Profile Editing States
@@ -29,30 +27,6 @@ export default function SettingsClient({ userProfile, userEmail }: { userProfile
   const [isPending, startTransition] = useTransition()
   const [securityMessage, setSecurityMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-
-  const router = useRouter()
-
-  const handleUpgrade = async () => {
-    setIsUpgrading(true)
-    try {
-      const response = await fetch('/api/payment/midtrans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: userEmail }),
-      })
-      const data = await response.json()
-      if (data.redirect_url) {
-        window.location.href = data.redirect_url
-      } else {
-        alert(data.error || 'Failed to initialize payment')
-        setIsUpgrading(false)
-      }
-    } catch (error) {
-      console.error(error)
-      alert('Network error')
-      setIsUpgrading(false)
-    }
-  }
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
