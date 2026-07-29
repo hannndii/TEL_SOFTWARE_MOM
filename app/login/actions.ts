@@ -115,10 +115,7 @@ export async function signup(formData: FormData) {
     redirect('/signup?error=' + encodeURIComponent(error.message))
   }
 
-  // Cek jika email sudah terdaftar (Supabase mengembalikan user tanpa identities jika prevent_email_enumeration aktif)
-  if (authData?.user && authData.user.identities && authData.user.identities.length === 0) {
-    redirect('/signup?error=' + encodeURIComponent('Alamat email ini sudah terdaftar. Silakan masuk (login) atau gunakan fitur Lupa Sandi.'))
-  }
+  // (Removed faulty manual identities check which caused false positives for new users)
 
   // Jika berhasil sign up tapi butuh konfirmasi email
   if (authData?.user && authData?.session === null) {
