@@ -1,3 +1,6 @@
+-- Enable moddatetime extension
+CREATE EXTENSION IF NOT EXISTS moddatetime schema extensions;
+
 -- Create projects table
 CREATE TABLE IF NOT EXISTS public.projects (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
