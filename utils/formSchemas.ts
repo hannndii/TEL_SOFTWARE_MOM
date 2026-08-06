@@ -12,7 +12,8 @@ export const projectSchema = z.object({
     parent_id: z.string().optional(),
   }),
   masaLayanan: z.object({
-    periode: z.string().optional(),
+    periode_start: z.string().optional(),
+    periode_end: z.string().optional(),
     tanggal_rfs: z.string().optional(),
   }),
   scopeOfWork: z.array(z.object({
