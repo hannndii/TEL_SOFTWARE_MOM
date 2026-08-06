@@ -23,7 +23,7 @@ export default function NewMomForm({ userTier, projects }: { userTier: string, p
       customerName: '',
       dasarPenunjukan: [''],
       linkTomps: { po: '', url: '', parent_id: '' },
-      masaLayanan: { periode: '', tanggal_rfs: '' },
+      masaLayanan: { periode_start: '', periode_end: '', tanggal_rfs: '' },
       scopeOfWork: [{ item_layanan: '', spesifikasi: '', qty_volume: '', qty_satuan: '', periode_waktu: '', periode_satuan: '' }],
       dokumenProject: [{ mitra: '', p8: '', kl: '', ao_sid: '', tanggal_dok: '', target_selesai: '' }],
       picProject: [{ name: '' }]
@@ -130,6 +130,30 @@ export default function NewMomForm({ userTier, projects }: { userTier: string, p
   const handleProjectSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
     setProjectValue('projectId', val)
+    if (val && val !== 'new') {
+      const selectedProj = projects.find(p => p.id === val)
+      if (selectedProj) {
+        setProjectValue('projectName', selectedProj.project_name || '')
+        setProjectValue('customerName', selectedProj.customer_name || '')
+        setProjectValue('dasarPenunjukan', selectedProj.dasar_penunjukan || [''])
+        setProjectValue('linkTomps', selectedProj.link_tomps || { po: '', url: '', parent_id: '' })
+        setProjectValue('masaLayanan', selectedProj.masa_layanan || { periode_start: '', periode_end: '', tanggal_rfs: '' })
+        
+        const sow = selectedProj.scope_of_work
+        setProjectValue('scopeOfWork', sow && sow.length > 0 ? sow : [{ item_layanan: '', spesifikasi: '', qty_volume: '', qty_satuan: '', periode_waktu: '', periode_satuan: '' }])
+        
+        const pic = selectedProj.pic_project
+        setProjectValue('picProject', pic && pic.length > 0 ? pic : [{ name: '' }])
+      }
+    } else if (val === 'new') {
+        setProjectValue('projectName', '')
+        setProjectValue('customerName', '')
+        setProjectValue('dasarPenunjukan', [''])
+        setProjectValue('linkTomps', { po: '', url: '', parent_id: '' })
+        setProjectValue('masaLayanan', { periode_start: '', periode_end: '', tanggal_rfs: '' })
+        setProjectValue('scopeOfWork', [{ item_layanan: '', spesifikasi: '', qty_volume: '', qty_satuan: '', periode_waktu: '', periode_satuan: '' }])
+        setProjectValue('picProject', [{ name: '' }])
+    }
   }
 
   return (
@@ -177,9 +201,9 @@ export default function NewMomForm({ userTier, projects }: { userTier: string, p
               </select>
             </div>
 
-            {selectedProjectId === 'new' && (
+            {selectedProjectId && (
               <div className="space-y-6 border-t pt-6 mt-6">
-                <h3 className="font-semibold text-lg">New Project Template</h3>
+                <h3 className="font-semibold text-lg">{selectedProjectId === 'new' ? 'New Project Template' : 'Project Template Details (Editable)'}</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-1">Project Name</label>
@@ -226,10 +250,14 @@ export default function NewMomForm({ userTier, projects }: { userTier: string, p
                 {/* Masa Layanan */}
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h4 className="font-medium mb-2 text-sm">Masa Layanan dan RFS</h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-medium mb-1">Periode Layanan</label>
-                      <input {...regProject('masaLayanan.periode')} className="w-full px-3 py-1.5 border rounded-md text-sm" placeholder="e.g. 12 Bulan" />
+                      <label className="block text-xs font-medium mb-1">Mulai Layanan</label>
+                      <input {...regProject('masaLayanan.periode_start')} type="date" className="w-full px-3 py-1.5 border rounded-md text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Berakhir Layanan</label>
+                      <input {...regProject('masaLayanan.periode_end')} type="date" className="w-full px-3 py-1.5 border rounded-md text-sm" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium mb-1">Tanggal RFS</label>

@@ -264,6 +264,12 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                 {isEditing ? <input value={editedTopic} onChange={e => setEditedTopic(e.target.value)} className="border-b outline-none w-full"/> : editedTopic || '-'}
               </td>
             </tr>
+            <tr>
+              <td className="border border-slate-300 p-2 font-medium">TYPE OF MEETING</td>
+              <td colSpan={3} className="border border-slate-300 p-2">
+                {isEditing ? <input value={(actContent.type_of_meeting || mom.type_of_meeting || []).join(', ')} onChange={e => setEditedContent({...actContent, type_of_meeting: e.target.value.split(',').map(s=>s.trim())})} className="border-b outline-none w-full"/> : (actContent.type_of_meeting || mom.type_of_meeting || []).join(', ')}
+              </td>
+            </tr>
           </tbody>
         </table>
 
@@ -272,11 +278,21 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           <p className="font-bold">1. Dasar Penunjukan:</p>
           <ol className="list-[lower-alpha] pl-8">
             {(actContent.dasar_penunjukan || []).map((dp: string, i: number) => (
-              <li key={i}>
-                {isEditing ? <textarea value={dp} onChange={e => updateArray('dasar_penunjukan', i, null, e.target.value)} className="w-full border-b outline-none min-h-[30px]"/> : dp}
+              <li key={i} className="mb-1">
+                <div className="flex gap-2 items-start">
+                  {isEditing ? (
+                    <>
+                      <textarea value={dp} onChange={e => updateArray('dasar_penunjukan', i, null, e.target.value)} className="w-full border-b outline-none min-h-[30px]"/>
+                      <button onClick={() => removeArrayItem('dasar_penunjukan', i)} className="text-red-500 hover:bg-red-50 p-1 rounded mt-1"><Trash2 size={16}/></button>
+                    </>
+                  ) : (
+                    <span>{dp}</span>
+                  )}
+                </div>
               </li>
             ))}
           </ol>
+          {isEditing && <button onClick={() => addArrayItem('dasar_penunjukan', '')} className="text-blue-600 flex items-center gap-1 text-sm mt-2 ml-8"><Plus size={16}/> Add Dasar Penunjukan</button>}
         </div>
 
         {/* 2. Link Tomps */}
@@ -302,19 +318,26 @@ export default function MomDetailClient({ mom }: { mom: any }) {
         <div className="mb-4">
           <p className="font-bold">3. Masa Layanan dan Ready For Service (RFS):</p>
           <ul className="list-[lower-alpha] pl-8">
-            <li>Periode Layanan: {isEditing ? <input value={actContent.masa_layanan?.periode} onChange={e => updateObject('masa_layanan', 'periode', e.target.value)} className="border-b outline-none"/> : actContent.masa_layanan?.periode}</li>
-            <li>Tanggal RFS: {isEditing ? <input value={actContent.masa_layanan?.tanggal_rfs} onChange={e => updateObject('masa_layanan', 'tanggal_rfs', e.target.value)} className="border-b outline-none"/> : actContent.masa_layanan?.tanggal_rfs}</li>
+            <li className="mb-1">Periode Layanan: {isEditing ? (
+              <span className="inline-flex items-center gap-2">
+                <input value={actContent.masa_layanan?.periode_start || ''} onChange={e => updateObject('masa_layanan', 'periode_start', e.target.value)} type="date" className="border-b outline-none"/>
+                <span> - </span>
+                <input value={actContent.masa_layanan?.periode_end || ''} onChange={e => updateObject('masa_layanan', 'periode_end', e.target.value)} type="date" className="border-b outline-none"/>
+              </span>
+            ) : `${actContent.masa_layanan?.periode_start || ''} s/d ${actContent.masa_layanan?.periode_end || ''}`}</li>
+            <li>Tanggal RFS: {isEditing ? <input value={actContent.masa_layanan?.tanggal_rfs || ''} onChange={e => updateObject('masa_layanan', 'tanggal_rfs', e.target.value)} type="date" className="border-b outline-none"/> : actContent.masa_layanan?.tanggal_rfs}</li>
           </ul>
         </div>
 
         {/* 4. Scope of Work */}
-        <div className="mb-4">
+        <div className="mb-4 overflow-x-auto">
           <p className="font-bold">4. Scope of Work:</p>
           <table className="w-full border-collapse border border-slate-300 mt-2 text-center text-xs">
             <thead>
               <tr className="bg-gray-100">
                 <th rowSpan={2} className="border p-2">NO</th><th rowSpan={2} className="border p-2">ITEM LAYANAN</th><th rowSpan={2} className="border p-2">SPESIFIKASI</th>
                 <th colSpan={2} className="border p-2">QTY</th><th colSpan={2} className="border p-2">PERIODE</th>
+                {isEditing && <th rowSpan={2} className="border p-2">Action</th>}
               </tr>
               <tr className="bg-gray-100">
                 <th className="border p-1">VOLUME</th><th className="border p-1">SATUAN</th><th className="border p-1">PERIODE</th><th className="border p-1">SATUAN</th>
@@ -330,8 +353,20 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                   <td className="border p-2">{isEditing ? <input value={sow.qty_satuan} onChange={e => updateArray('scope_of_work', i, 'qty_satuan', e.target.value)} className="w-full text-center outline-none"/> : sow.qty_satuan}</td>
                   <td className="border p-2">{isEditing ? <input value={sow.periode_waktu} onChange={e => updateArray('scope_of_work', i, 'periode_waktu', e.target.value)} className="w-full text-center outline-none"/> : sow.periode_waktu}</td>
                   <td className="border p-2">{isEditing ? <input value={sow.periode_satuan} onChange={e => updateArray('scope_of_work', i, 'periode_satuan', e.target.value)} className="w-full text-center outline-none"/> : sow.periode_satuan}</td>
+                  {isEditing && (
+                    <td className="border p-2">
+                      <button onClick={() => removeArrayItem('scope_of_work', i)} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16}/></button>
+                    </td>
+                  )}
                 </tr>
               ))}
+              {isEditing && (
+                <tr>
+                  <td colSpan={8} className="border p-2">
+                    <button onClick={() => addArrayItem('scope_of_work', {item_layanan:'',spesifikasi:'',qty_volume:'',qty_satuan:'',periode_waktu:'',periode_satuan:''})} className="text-blue-600 flex items-center justify-center gap-1 w-full text-sm font-medium"><Plus size={16}/> Add Row</button>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
@@ -341,9 +376,21 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           <p className="font-bold">5. Issue:</p>
           <ol className="list-[lower-alpha] pl-8">
             {(actContent.issue || []).map((iss: string, i: number) => (
-              <li key={i}>{isEditing ? <textarea value={iss} onChange={e => updateArray('issue', i, null, e.target.value)} className="w-full border-b outline-none"/> : iss}</li>
+              <li key={i} className="mb-1">
+                <div className="flex gap-2 items-start">
+                  {isEditing ? (
+                    <>
+                      <textarea value={iss} onChange={e => updateArray('issue', i, null, e.target.value)} className="w-full border-b outline-none min-h-[30px]"/>
+                      <button onClick={() => removeArrayItem('issue', i)} className="text-red-500 hover:bg-red-50 p-1 rounded mt-1"><Trash2 size={16}/></button>
+                    </>
+                  ) : (
+                    <span>{iss}</span>
+                  )}
+                </div>
+              </li>
             ))}
           </ol>
+          {isEditing && <button onClick={() => addArrayItem('issue', '')} className="text-blue-600 flex items-center gap-1 text-sm mt-2 ml-8"><Plus size={16}/> Add Issue</button>}
         </div>
 
         {/* 6. Action Plan */}
@@ -351,9 +398,21 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           <p className="font-bold">6. Action Plan:</p>
           <ol className="list-[lower-alpha] pl-8">
             {(actContent.action_plan || []).map((ap: any, i: number) => (
-              <li key={i}>{isEditing ? <textarea value={`${ap.pic} akan memproses ${ap.action} -> Due Date: ${ap.due_date}`} onChange={e => updateArray('action_plan', i, 'action', e.target.value)} className="w-full border-b outline-none"/> : `${ap.pic} akan memproses ${ap.action} -> Due Date: ${ap.due_date}`}</li>
+              <li key={i} className="mb-1">
+                <div className="flex gap-2 items-start">
+                  {isEditing ? (
+                    <>
+                      <textarea value={`${ap.pic} akan memproses ${ap.action} -> Due Date: ${ap.due_date}`} onChange={e => updateArray('action_plan', i, 'action', e.target.value)} className="w-full border-b outline-none min-h-[30px]"/>
+                      <button onClick={() => removeArrayItem('action_plan', i)} className="text-red-500 hover:bg-red-50 p-1 rounded mt-1"><Trash2 size={16}/></button>
+                    </>
+                  ) : (
+                    <span>{`${ap.pic} akan memproses ${ap.action} -> Due Date: ${ap.due_date}`}</span>
+                  )}
+                </div>
+              </li>
             ))}
           </ol>
+          {isEditing && <button onClick={() => addArrayItem('action_plan', { pic: 'PIC', action: 'Action', due_date: 'Date' })} className="text-blue-600 flex items-center gap-1 text-sm mt-2 ml-8"><Plus size={16}/> Add Action Plan</button>}
         </div>
 
         {/* 8. Kesepakatan */}
@@ -362,9 +421,21 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           <ol className="list-[lower-alpha] pl-8">
             <li>Dokumen Minutes of Meeting ini bukan pengganti dokumen P8 / Surat Penetapan Mitra Kerja/ Work Order/Surat Pesanan;</li>
             {(actContent.kesepakatan || []).map((ks: string, i: number) => (
-              <li key={i}>{isEditing ? <textarea value={ks} onChange={e => updateArray('kesepakatan', i, null, e.target.value)} className="w-full border-b outline-none"/> : ks}</li>
+              <li key={i} className="mb-1">
+                <div className="flex gap-2 items-start">
+                  {isEditing ? (
+                    <>
+                      <textarea value={ks} onChange={e => updateArray('kesepakatan', i, null, e.target.value)} className="w-full border-b outline-none min-h-[30px]"/>
+                      <button onClick={() => removeArrayItem('kesepakatan', i)} className="text-red-500 hover:bg-red-50 p-1 rounded mt-1"><Trash2 size={16}/></button>
+                    </>
+                  ) : (
+                    <span>{ks}</span>
+                  )}
+                </div>
+              </li>
             ))}
           </ol>
+          {isEditing && <button onClick={() => addArrayItem('kesepakatan', '')} className="text-blue-600 flex items-center gap-1 text-sm mt-2 ml-8"><Plus size={16}/> Add Kesepakatan</button>}
         </div>
         
         {/* 9. PIC Project */}
@@ -372,11 +443,21 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           <p className="font-bold">9. PIC Project:</p>
           <ol className="list-decimal pl-8">
             {(actContent.pic_project || []).map((pic: any, i: number) => (
-              <li key={i}>
-                {isEditing ? <input value={pic.name} onChange={e => updateArray('pic_project', i, 'name', e.target.value)} className="w-full border-b outline-none"/> : pic.name}
+              <li key={i} className="mb-1">
+                <div className="flex gap-2 items-start">
+                  {isEditing ? (
+                    <>
+                      <input value={pic.name} onChange={e => updateArray('pic_project', i, 'name', e.target.value)} className="w-full border-b outline-none"/>
+                      <button onClick={() => removeArrayItem('pic_project', i)} className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16}/></button>
+                    </>
+                  ) : (
+                    <span>{pic.name}</span>
+                  )}
+                </div>
               </li>
             ))}
           </ol>
+          {isEditing && <button onClick={() => addArrayItem('pic_project', { name: '' })} className="text-blue-600 flex items-center gap-1 text-sm mt-2 ml-8"><Plus size={16}/> Add PIC</button>}
         </div>
         
         {/* TTD Section */}
