@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, AlertCircle, Printer, CheckCircle2, UploadCloud, Edit2, Save, X, Plus, Trash2, ChevronDown, Download, FileText as FileTextIcon, Camera } from 'lucide-react'
+import { Loader2, Printer, Edit2, Plus, Trash2, Camera } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
 export default function MomDetailClient({ mom }: { mom: any }) {
