@@ -380,24 +380,26 @@ export default function MomDetailClient({ mom }: { mom: any }) {
         </div>
         
         {/* TTD Section */}
-        <div className="mt-20">
-          <div className="flex justify-between text-center gap-10 overflow-x-auto pb-4">
+        <div className="mt-16 break-inside-avoid">
+          <div className="text-center mb-6">
+            <p>Jakarta, {formattedDate}</p>
+            <p>Mengetahui,</p>
+          </div>
+          
+          <div className="flex flex-wrap justify-center text-center gap-6">
             {/* Note Taker Sign */}
-            <div className="min-w-[150px]">
-              <p>Jakarta, {formattedDate}</p>
-              <p>Mengetahui,</p>
-              <div className="mt-24 border-b border-black mx-auto"></div>
-              <p>{editedNoteTaker || '....................'}</p>
+            <div className="w-[200px] h-[160px] border border-black flex flex-col justify-end p-2 relative">
+              <div className="border-b border-black w-full mb-2"></div>
+              <p className="font-semibold">{editedNoteTaker || '....................'}</p>
+              <p className="text-xs">Note Taker</p>
             </div>
             
             {/* Attendees Signs */}
             {(actContent.signatures || mom.participants || []).map((attendant: string, i: number) => (
-              <div key={i} className="min-w-[150px] relative">
-                <p>&nbsp;</p>
-                <p>&nbsp;</p>
-                <div className="mt-24 border-b border-black mx-auto"></div>
+              <div key={i} className="w-[200px] h-[160px] border border-black flex flex-col justify-end p-2 relative group">
+                <div className="border-b border-black w-full mb-2"></div>
                 {isEditing ? (
-                  <div className="flex items-center gap-1">
+                  <div className="flex flex-col items-center">
                     <input 
                       value={attendant} 
                       onChange={e => {
@@ -405,27 +407,28 @@ export default function MomDetailClient({ mom }: { mom: any }) {
                         newSigs[i] = e.target.value
                         setEditedContent({...actContent, signatures: newSigs})
                       }} 
-                      className="w-full border-b outline-none text-center"
+                      className="w-full text-center outline-none bg-slate-50 font-semibold text-sm"
                     />
                     <button onClick={() => {
                         const newSigs = [...(actContent.signatures || mom.participants || [])]
                         newSigs.splice(i, 1)
                         setEditedContent({...actContent, signatures: newSigs})
-                    }} className="text-red-500"><Trash2 size={14}/></button>
+                    }} className="text-red-500 absolute top-2 right-2 opacity-50 hover:opacity-100"><Trash2 size={16}/></button>
                   </div>
                 ) : (
-                  <p>{attendant}</p>
+                  <p className="font-semibold text-sm">{attendant}</p>
                 )}
               </div>
             ))}
             
             {isEditing && (
-              <div className="min-w-[150px] flex items-center justify-center">
+              <div className="w-[200px] h-[160px] border-2 border-dashed border-blue-400 flex items-center justify-center">
                 <button onClick={() => {
                   const newSigs = [...(actContent.signatures || mom.participants || []), 'Nama Baru']
                   setEditedContent({...actContent, signatures: newSigs})
-                }} className="text-blue-600 flex items-center gap-1 border border-blue-200 px-3 py-1 rounded">
-                  <Plus size={16} /> Add TTD
+                }} className="text-blue-600 flex flex-col items-center gap-1 hover:text-blue-800 transition-colors">
+                  <Plus size={24} />
+                  <span className="text-sm font-medium">Add TTD</span>
                 </button>
               </div>
             )}
