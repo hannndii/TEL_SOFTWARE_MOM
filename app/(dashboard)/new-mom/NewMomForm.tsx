@@ -116,7 +116,7 @@ export default function NewMomForm({ userTier, projects }: { userTier: string, p
 
       const result = await submitMomDraft(submitData)
       if (result.success) {
-        router.push('/')
+        router.push(`/mom/${result.id}`)
       } else {
         setError(result.error || 'Failed to submit form')
       }

@@ -129,7 +129,27 @@ export default function MomDetailClient({ mom }: { mom: any }) {
   }
 
   if (isProcessing) {
-    return <div className="text-center py-20">Generating...</div>
+    return (
+      <div className="flex flex-col items-center justify-center py-32 max-w-lg mx-auto text-center space-y-6">
+        <div className="relative mb-4">
+          <div className="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center animate-pulse shadow-inner border border-red-100 mx-auto">
+            <Loader2 className="text-telkom-red animate-spin" size={48} />
+          </div>
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Menyusun Dokumen MoM...</h2>
+          <p className="text-gray-600 mt-3 text-base leading-relaxed">
+            Sistem sedang menyusun transkrip rapat dan menyesuaikannya dengan format template Project Anda. Proses ini membutuhkan waktu beberapa saat.
+          </p>
+          <div className="mt-8">
+            <span className="bg-slate-100 text-slate-700 px-5 py-2.5 rounded-lg text-sm font-medium border border-slate-200 shadow-sm inline-flex items-center gap-2">
+              <Loader2 size={16} className="animate-spin text-slate-400" />
+              Mohon tunggu sekitar 30 - 60 detik
+            </span>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const meetingDateObj = new Date(mom.meeting_date)
