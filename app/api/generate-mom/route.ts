@@ -6,6 +6,11 @@ import { createClient as createAdminClient } from '@supabase/supabase-js'
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY })
 
+// In-memory rate limiter (resets on server restart/cold boot, but lightweight)
+const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+const MAX_REQUESTS = 3; // Max requests per user per minute
+const WINDOW_MS = 60 * 1000; // 1 minute
+
 export async function POST(request: Request) {
   try {
     const supabase = await createClient()
@@ -13,6 +18,23 @@ export async function POST(request: Request) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate Limiting Logic (by user ID)
+    const nowTime = Date.now();
+    const userRateData = rateLimitMap.get(user.id) || { count: 0, resetTime: nowTime + WINDOW_MS };
+    
+    if (nowTime > userRateData.resetTime) {
+      userRateData.count = 1;
+      userRateData.resetTime = nowTime + WINDOW_MS;
+    } else {
+      userRateData.count += 1;
+    }
+    
+    rateLimitMap.set(user.id, userRateData);
+
+    if (userRateData.count > MAX_REQUESTS) {
+      return NextResponse.json({ error: 'Too many requests. Please wait a minute before generating again.' }, { status: 429 })
     }
 
     const body = await request.json()
@@ -130,27 +152,17 @@ export async function POST(request: Request) {
     const systemPrompt = `You are a professional corporate secretary assistant for Telkom Indonesia. Your task is to extract meeting minutes from the provided document(s) and format it strictly matching this template. If multiple documents are provided, treat them as parts of a single continuous meeting.
 Output the result strictly as a valid JSON object with the following schema:
 {
-  "dasar_pembahasan": ["Array of strings representing the main topics discussed (Dasar Pembahasan)"],
-  "notes": [
-    {
-      "nama_pihak": "String representing the name of the speaker/party",
-      "informasi": ["Array of strings containing the points/information they delivered"]
-    }
-  ],
+  "issue": ["Array of strings representing the issues discussed (Issue/Kendala)"],
   "action_plan": [
     {
+      "action": "String describing the action to be taken",
       "pic": "String representing the Person in Charge",
-      "action": "String describing the action to be taken"
+      "due_date": "String representing the target date (e.g., W4 Februari)"
     }
   ],
-  "informasi_tambahan": {
-    "keputusan_final": "String summarizing the final decision",
-    "kendala": "String summarizing any obstacles mentioned",
-    "risiko": "String summarizing any risks mentioned",
-    "menunggu_keputusan": "String summarizing things still pending decision"
-  }
+  "kesepakatan": ["Array of strings representing the final agreements (Kesepakatan)"]
 }
-Ensure the language is formal Indonesian. If any section is not mentioned in the transcript, provide an empty array [] or "-" instead of null.
+Ensure the language is formal Indonesian. If any section is not mentioned in the transcript, provide an empty array [] instead of null.
 `
     const userPrompt = `
 Meeting Topic: ${momData.topic}
@@ -202,6 +214,16 @@ Please analyze the attached meeting transcript document(s).
     generatedJson.location = momData.content_json.location
     generatedJson.time = momData.content_json.time
     generatedJson.type_of_meeting = momData.content_json.type_of_meeting
+    
+    // Preserve Project Snapshot
+    generatedJson.customer_name = momData.content_json.customer_name
+    generatedJson.project_name = momData.content_json.project_name
+    generatedJson.dasar_penunjukan = momData.content_json.dasar_penunjukan
+    generatedJson.link_tomps = momData.content_json.link_tomps
+    generatedJson.masa_layanan = momData.content_json.masa_layanan
+    generatedJson.scope_of_work = momData.content_json.scope_of_work
+    generatedJson.dokumen_project = momData.content_json.dokumen_project
+    generatedJson.pic_project = momData.content_json.pic_project
 
     // 5. Update Database (Update content_json, status, and AI model)
     const { error: updateError } = await supabase

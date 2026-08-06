@@ -1,6 +1,44 @@
 import { z } from "zod";
 
-// Step 1: Metadata
+// Step 1: Project
+export const projectSchema = z.object({
+  projectId: z.string().optional(), // 'new' or UUID
+  projectName: z.string().min(2, "Project name is required"),
+  customerName: z.string().min(2, "Customer name is required"),
+  dasarPenunjukan: z.array(z.string()),
+  linkTomps: z.object({
+    po: z.string().optional(),
+    url: z.string().optional(),
+    parent_id: z.string().optional(),
+  }),
+  masaLayanan: z.object({
+    periode: z.string().optional(),
+    tanggal_rfs: z.string().optional(),
+  }),
+  scopeOfWork: z.array(z.object({
+    item_layanan: z.string(),
+    spesifikasi: z.string(),
+    qty_volume: z.string(),
+    qty_satuan: z.string(),
+    periode_waktu: z.string(),
+    periode_satuan: z.string(),
+  })),
+  dokumenProject: z.array(z.object({
+    mitra: z.string(),
+    p8: z.string(),
+    kl: z.string(),
+    ao_sid: z.string(),
+    tanggal_dok: z.string(),
+    target_selesai: z.string(),
+  })),
+  picProject: z.array(z.object({
+    name: z.string(),
+  })),
+});
+
+export type ProjectFormValues = z.infer<typeof projectSchema>;
+
+// Step 2: Metadata
 export const metadataSchema = z.object({
   agenda: z.string().min(3, "Agenda must be at least 3 characters").max(500, "Agenda is too long"),
   meeting_date: z.string().min(1, "Meeting date is required"),
@@ -10,6 +48,7 @@ export const metadataSchema = z.object({
   other_meeting_type: z.string().optional(),
   attendees: z.string().min(2, "Attendees are required"),
   facilitator: z.string().min(2, "Facilitator name is required"),
+  note_taker: z.string().min(2, "Note taker (Nama Pembuat MoM) is required"),
 }).superRefine((data, ctx) => {
   if (data.type_of_meeting.includes("Other") && (!data.other_meeting_type || data.other_meeting_type.trim() === "")) {
     ctx.addIssue({

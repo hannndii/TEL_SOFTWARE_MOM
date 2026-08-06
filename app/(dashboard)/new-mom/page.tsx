@@ -9,6 +9,8 @@ export default async function NewMomPage() {
 
   let userTier = 'free'
 
+  let projects: any[] = []
+
   if (user) {
     const { data: userProfile } = await supabase
       .from('users')
@@ -18,6 +20,16 @@ export default async function NewMomPage() {
       
     if (userProfile) {
       userTier = userProfile.tier
+    }
+
+    const { data: userProjects } = await supabase
+      .from('projects')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      
+    if (userProjects) {
+      projects = userProjects
     }
   }
 
@@ -32,8 +44,7 @@ export default async function NewMomPage() {
       </div>
       
       <div className="max-w-5xl mx-auto relative z-20 px-4 md:px-0">
-      
-      <NewMomForm userTier={userTier} />
+      <NewMomForm userTier={userTier} projects={projects} />
       </div>
     </div>
   )
