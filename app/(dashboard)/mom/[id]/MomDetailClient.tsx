@@ -387,13 +387,6 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           </div>
           
           <div className="flex flex-wrap justify-center text-center gap-6">
-            {/* Note Taker Sign */}
-            <div className="w-[200px] h-[160px] border border-black flex flex-col justify-end p-2 relative">
-              <div className="border-b border-black w-full mb-2"></div>
-              <p className="font-semibold">{editedNoteTaker || '....................'}</p>
-              <p className="text-xs">Note Taker</p>
-            </div>
-            
             {/* Attendees Signs */}
             {(actContent.signatures || mom.participants || []).map((attendant: string, i: number) => (
               <div key={i} className="w-[200px] h-[160px] border border-black flex flex-col justify-end p-2 relative group">
