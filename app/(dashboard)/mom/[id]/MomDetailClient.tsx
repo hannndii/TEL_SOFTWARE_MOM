@@ -74,7 +74,40 @@ export default function MomDetailClient({ mom }: { mom: any }) {
   }, [mom, router])
 
   const handleEvidenceUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    // simplified for brevity...
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    setIsUploadingEvidence(true)
+    try {
+      const supabase = createClient()
+      const evidenceExt = file.name.split('.').pop()
+      const evidenceFileName = `${mom.user_id}/${Date.now()}_evidence.${evidenceExt}`
+      
+      const { error: uploadError } = await supabase.storage
+        .from('mom_evidences')
+        .upload(evidenceFileName, file)
+
+      if (uploadError) throw new Error("Failed to upload image")
+
+      const { data: publicUrlData } = supabase.storage
+        .from('mom_evidences')
+        .getPublicUrl(evidenceFileName)
+
+      const newUrl = publicUrlData.publicUrl
+
+      const { error: dbError } = await supabase
+        .from('meeting_mom')
+        .update({ photo_evidence_url: newUrl })
+        .eq('id', mom.id)
+
+      if (dbError) throw new Error("Failed to update database")
+
+      setEvidenceUrl(newUrl)
+    } catch (err: any) {
+      alert(err.message || "An error occurred uploading evidence")
+    } finally {
+      setIsUploadingEvidence(false)
+    }
   }
 
   const handleSaveEdit = async () => {
@@ -172,7 +205,9 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           ) : (
             <>
               <button onClick={() => setIsEditing(true)} className="px-4 py-2 border rounded">Edit</button>
-              <button onClick={exportToPDF} className="px-4 py-2 bg-telkom-navy text-white rounded">Export PDF</button>
+              <button onClick={exportToPDF} className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded flex items-center gap-2">
+                <Printer size={16} /> Cetak / Export PDF
+              </button>
             </>
           )}
         </div>
@@ -303,7 +338,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
 
         {/* 5. Issue */}
         <div className="mb-4">
-          <p className="font-bold">5. Issue (*hasil generate dari transcript meeting):</p>
+          <p className="font-bold">5. Issue:</p>
           <ol className="list-[lower-alpha] pl-8">
             {(actContent.issue || []).map((iss: string, i: number) => (
               <li key={i}>{isEditing ? <textarea value={iss} onChange={e => updateArray('issue', i, null, e.target.value)} className="w-full border-b outline-none"/> : iss}</li>
@@ -313,7 +348,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
 
         {/* 6. Action Plan */}
         <div className="mb-4">
-          <p className="font-bold">6. Action Plan (*hasil generate dari transcript meeting):</p>
+          <p className="font-bold">6. Action Plan:</p>
           <ol className="list-[lower-alpha] pl-8">
             {(actContent.action_plan || []).map((ap: any, i: number) => (
               <li key={i}>{isEditing ? <textarea value={`${ap.pic} akan memproses ${ap.action} -> Due Date: ${ap.due_date}`} onChange={e => updateArray('action_plan', i, 'action', e.target.value)} className="w-full border-b outline-none"/> : `${ap.pic} akan memproses ${ap.action} -> Due Date: ${ap.due_date}`}</li>
@@ -323,7 +358,7 @@ export default function MomDetailClient({ mom }: { mom: any }) {
 
         {/* 8. Kesepakatan */}
         <div className="mb-4">
-          <p className="font-bold">8. Kesepakatan (*hasil generate dari transcript meeting):</p>
+          <p className="font-bold">8. Kesepakatan:</p>
           <ol className="list-[lower-alpha] pl-8">
             <li>Dokumen Minutes of Meeting ini bukan pengganti dokumen P8 / Surat Penetapan Mitra Kerja/ Work Order/Surat Pesanan;</li>
             {(actContent.kesepakatan || []).map((ks: string, i: number) => (
@@ -332,15 +367,96 @@ export default function MomDetailClient({ mom }: { mom: any }) {
           </ol>
         </div>
         
+        {/* 9. PIC Project */}
+        <div className="mb-4">
+          <p className="font-bold">9. PIC Project:</p>
+          <ol className="list-decimal pl-8">
+            {(actContent.pic_project || []).map((pic: any, i: number) => (
+              <li key={i}>
+                {isEditing ? <input value={pic.name} onChange={e => updateArray('pic_project', i, 'name', e.target.value)} className="w-full border-b outline-none"/> : pic.name}
+              </li>
+            ))}
+          </ol>
+        </div>
+        
         {/* TTD Section */}
         <div className="mt-20">
-          <div className="text-center float-right">
-            <p>Jakarta, {formattedDate}</p>
-            <p>Mengetahui,</p>
-            <div className="mt-20 border-b border-black w-48 mx-auto"></div>
-            <p>{editedNoteTaker || '....................'}</p>
+          <div className="flex justify-between text-center gap-10 overflow-x-auto pb-4">
+            {/* Note Taker Sign */}
+            <div className="min-w-[150px]">
+              <p>Jakarta, {formattedDate}</p>
+              <p>Mengetahui,</p>
+              <div className="mt-24 border-b border-black mx-auto"></div>
+              <p>{editedNoteTaker || '....................'}</p>
+            </div>
+            
+            {/* Attendees Signs */}
+            {(actContent.signatures || mom.participants || []).map((attendant: string, i: number) => (
+              <div key={i} className="min-w-[150px] relative">
+                <p>&nbsp;</p>
+                <p>&nbsp;</p>
+                <div className="mt-24 border-b border-black mx-auto"></div>
+                {isEditing ? (
+                  <div className="flex items-center gap-1">
+                    <input 
+                      value={attendant} 
+                      onChange={e => {
+                        const newSigs = [...(actContent.signatures || mom.participants || [])]
+                        newSigs[i] = e.target.value
+                        setEditedContent({...actContent, signatures: newSigs})
+                      }} 
+                      className="w-full border-b outline-none text-center"
+                    />
+                    <button onClick={() => {
+                        const newSigs = [...(actContent.signatures || mom.participants || [])]
+                        newSigs.splice(i, 1)
+                        setEditedContent({...actContent, signatures: newSigs})
+                    }} className="text-red-500"><Trash2 size={14}/></button>
+                  </div>
+                ) : (
+                  <p>{attendant}</p>
+                )}
+              </div>
+            ))}
+            
+            {isEditing && (
+              <div className="min-w-[150px] flex items-center justify-center">
+                <button onClick={() => {
+                  const newSigs = [...(actContent.signatures || mom.participants || []), 'Nama Baru']
+                  setEditedContent({...actContent, signatures: newSigs})
+                }} className="text-blue-600 flex items-center gap-1 border border-blue-200 px-3 py-1 rounded">
+                  <Plus size={16} /> Add TTD
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* EVIDENCE PHOTO */}
+        {evidenceUrl ? (
+          <div className="mt-10 break-before-page flex flex-col items-center">
+            <p className="text-xs italic mb-4">*photo input as evidence</p>
+            <img src={evidenceUrl} alt="Evidence" className="max-w-full h-auto max-h-[150mm] object-contain border border-slate-200 shadow-sm" />
+            {isEditing && (
+              <div className="mt-4 print:hidden">
+                <input type="file" id="evidenceUploadEdit" className="hidden" accept="image/jpeg,image/png,image/jpg" onChange={handleEvidenceUpload} />
+                <label htmlFor="evidenceUploadEdit" className="cursor-pointer bg-slate-100 text-slate-700 px-4 py-2 rounded-md font-semibold hover:bg-slate-200 transition-colors flex items-center gap-2 border border-slate-300 shadow-sm">
+                  {isUploadingEvidence ? <Loader2 size={16} className="animate-spin" /> : <Edit2 size={16} />}
+                  {isUploadingEvidence ? 'Replacing...' : 'Replace Photo'}
+                </label>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="mt-10 pt-10 border-t border-dashed border-gray-300 print:hidden flex flex-col items-center">
+            <p className="text-sm text-gray-500 mb-4 font-medium">Add an evidence photo (Optional)</p>
+            <input type="file" id="evidenceUpload" className="hidden" accept="image/jpeg,image/png,image/jpg" onChange={handleEvidenceUpload} />
+            <label htmlFor="evidenceUpload" className="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md font-medium hover:bg-gray-50 transition-colors flex items-center gap-2 shadow-sm">
+              {isUploadingEvidence ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+              {isUploadingEvidence ? 'Uploading...' : 'Upload Photo'}
+            </label>
+          </div>
+        )}
       </div>
     </div>
   )

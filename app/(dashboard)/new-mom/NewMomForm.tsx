@@ -204,6 +204,40 @@ export default function NewMomForm({ userTier, projects }: { userTier: string, p
                   <button type="button" onClick={() => appendDp('')} className="text-sm text-telkom-red flex items-center mt-2"><Plus size={16}/> Add Dasar Penunjukan</button>
                 </div>
 
+                {/* Link Tomps */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-sm">Link Tomps</h4>
+                  <div className="grid grid-cols-2 gap-4 mb-2">
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Parent ID</label>
+                      <input {...regProject('linkTomps.parent_id')} className="w-full px-3 py-1.5 border rounded-md text-sm" placeholder="e.g. P12345" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">PO</label>
+                      <input {...regProject('linkTomps.po')} className="w-full px-3 py-1.5 border rounded-md text-sm" placeholder="e.g. PO-9876" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium mb-1">URL</label>
+                    <input {...regProject('linkTomps.url')} className="w-full px-3 py-1.5 border rounded-md text-sm" placeholder="https://..." />
+                  </div>
+                </div>
+
+                {/* Masa Layanan */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-sm">Masa Layanan dan RFS</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Periode Layanan</label>
+                      <input {...regProject('masaLayanan.periode')} className="w-full px-3 py-1.5 border rounded-md text-sm" placeholder="e.g. 12 Bulan" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium mb-1">Tanggal RFS</label>
+                      <input {...regProject('masaLayanan.tanggal_rfs')} type="date" className="w-full px-3 py-1.5 border rounded-md text-sm" />
+                    </div>
+                  </div>
+                </div>
+
                 {/* Scope of Work */}
                 <div className="bg-gray-50 p-4 rounded-lg overflow-x-auto">
                   <h4 className="font-medium mb-2 text-sm">Scope of Work</h4>
@@ -221,7 +255,17 @@ export default function NewMomForm({ userTier, projects }: { userTier: string, p
                   <button type="button" onClick={() => appendSow({item_layanan:'',spesifikasi:'',qty_volume:'',qty_satuan:'',periode_waktu:'',periode_satuan:''})} className="text-sm text-telkom-red flex items-center mt-2"><Plus size={16}/> Add Scope</button>
                 </div>
 
-                {/* Note: I've truncated some form fields for simplicity, normally they would all be here */}
+                {/* PIC Project */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium mb-2 text-sm">PIC Project</h4>
+                  {picFields.map((field, idx) => (
+                    <div key={field.id} className="flex gap-2 mb-2">
+                      <input {...regProject(`picProject.${idx}.name`)} className="flex-1 px-3 py-1.5 border rounded-md text-sm" placeholder="e.g. John Doe - Manager" />
+                      <button type="button" onClick={() => removePic(idx)} className="text-red-500"><Trash2 size={16}/></button>
+                    </div>
+                  ))}
+                  <button type="button" onClick={() => appendPic({ name: '' })} className="text-sm text-telkom-red flex items-center mt-2"><Plus size={16}/> Add PIC</button>
+                </div>
               </div>
             )}
 
