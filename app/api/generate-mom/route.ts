@@ -150,12 +150,17 @@ export async function POST(request: Request) {
 
     // 4. Generate MoM using Gemini API
     const systemPrompt = `You are a professional corporate secretary assistant for Telkom Indonesia. Your task is to extract meeting minutes from the provided document(s) and format it strictly matching this template. If multiple documents are provided, treat them as parts of a single continuous meeting.
+
+Important Rules:
+1. "issue": Must accurately and precisely reflect what the speakers conveyed. Only record the important points that are the actual problems or constraints discussed in the meeting. Do not hallucinate.
+2. "action_plan": Each action plan must directly refer to or address the specific points mentioned in the "issue". Do not invent action plans that were not discussed; they must be grounded in the provided transcript.
+
 Output the result strictly as a valid JSON object with the following schema:
 {
-  "issue": ["Array of strings representing the issues discussed (Issue/Kendala)"],
+  "issue": ["Array of strings representing the exact, important problem points discussed (Issue/Kendala)"],
   "action_plan": [
     {
-      "action": "String describing the action to be taken",
+      "action": "String describing the action to be taken, directly addressing the issues based only on the discussion",
       "pic": "String representing the Person in Charge",
       "due_date": "String representing the target date (e.g., W4 Februari)"
     }
